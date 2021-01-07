@@ -1,0 +1,201 @@
+ROUTINE EnsDisplayString
+#include %occInclude
+	; Copyright (c) 2020 by InterSystems Corporation.
+	; Cambridge, Massachusetts, U.S.A.  All rights reserved.
+	; Confidential property of InterSystems Corporation.
+#include Ensemble
+
+#; Return a concatenation of all the strings from pArray, each prepended with pLineTerminator if given, or Ascii CR/LF
+ArrayToText(pArray,pLineTerminator) public
+{
+	Set pLineTerminator=$G(pLineTerminator,$S($$$isUNIX:$Char(10),1:$Char(13,10)))
+	Set tStr="",tKey=""
+	For  Set tKey=$Order(pArray(tKey)) Quit:""=tKey  Set tStr=pLineTerminator_pArray(tKey)_tStr
+	Quit tStr
+}
+ 
+#; Load DisplayStrings into globals for a bunch of languages from a list of filenames
+Load(pBaseFilename,pFiles,pDomain,pQFlags) public { ;(pBaseFilename as %String,pFiles as %String = "", pDomain as %String = "") as %Status
+	Set pFiles=$Get(pFiles)
+	Set pDomain=$Get(pDomain)
+ 
+	Set $ZT="Trap",tSC=$$$OK
+	Do {		
+		If (pFiles=""||(pDomain="")) {
+			Set tSC=$$$ERROR("<%ObjectErrors>DomainOrFilesEmpty")
+			Quit
+		}
+		#; Import the specified DisplayString files and get the list of domains
+		For tI=1:1:$Length(pFiles,",") {
+			Set tSC=$$Import^%occMessages($Piece(pFiles,",",tI),pQFlags,.tDomains,1)	
+			If $$$ISERR(tSC) Quit
+		}
+		If $$$ISERR(tSC) Quit
+ 
+		#; Test to see if at least one of the domains specified in the
+		#; files matches the domain parameter		
+		Set tDomain=$Order(tDomains("")),tFound=0
+		While tDomain'="" {
+			If tDomain=pDomain Set tFound=1 Quit
+			Set tDomain=$Order(tDomains(tDomain))
+		}
+		If tFound=0 Set tSC=$$$ERROR("<%ObjectErrors>MessageDomainNotFound")
+		
+		#; Generate the include file
+		Set tSC=$$GenerateInclude^%occMessages(pBaseFilename,pQFlags,pDomain,1)
+ 
+	} while (0)
+Exit
+	Quit tSC
+Trap
+	Set $ZT="",tSC=$$$ERROR("<%ObjectErrors>DisplayStringLoaderError",$ZE)
+	Goto Exit	
+}
+ 
+updateFromXData(pFilename,pLanguage,pDomain,pCompiledClass) public ;(pFilename as %String, pLanguage as %String, pDomain as %String, pCompiledClass as %Dictionary.CompiledClass, Output pSC as %Status) as %String [Private]
+{
+	#; Replace pFilename with XData contents if they're different; return pFilename, or "" if unable to access XData or create/update file pFilename
+	Set tSC = $$$OK
+	if (""=pFilename) || (""=pLanguage) || (""=pDomain) Quit tSC
+	New %ROWCOUNT,%objcn ; trash variables from FindObjectId()
+	Set tIndex = pCompiledClass.XDatas.FindObjectId(pCompiledClass.Name_"||MasterStrings")
+	If ""'=tIndex {
+		Set tStream = pCompiledClass.XDatas.GetAt(tIndex).Data
+		If 0'=tStream.Size {
+			Do tStream.Rewind()
+			Set tExists = ##class(%File).Exists(pFilename)
+			#;if ">"=$E(pFilename) { Set pFilename=$E(pFilename,2,$L(pFilename)) }
+			#;elseif tExists {
+			#;	Quit tSC
+			#;}
+			Set tFile=##class(%FileCharacterStream).%New()
+			Set tFile.TranslateTable="UTF8"
+			Set tSC = tFile.WriteLine("<?xml version=""1.0"" encoding=""UTF-8""?>")
+			Set tSC = tFile.WriteLine("<MsgFile Language="""_$ZCVT(pLanguage,"L")_""">")
+			Set tSC = tFile.WriteLine("<MsgDomain Domain="""_pDomain_""">")
+ 
+			Set tPos0 = tStream.FindAt(1,"<")
+			Set tPos1 = tStream.FindAt(tPos0+1,">")
+ 
+			Do tStream.MoveTo(tPos0)
+			Set tTag = tStream.Read(tPos1-tPos0+1)
+			Set $E(tTag,1)="</"
+ 
+			Set tPos2 = tStream.FindAt(tPos1,tTag)
+			
+			Do tStream.MoveTo(tPos0+tPos1)
+ 
+			;Loop copying until end tag
+			;Set tSC = tFile.CopyFrom(tStream)
+			Set left = tPos2-(tPos1+1)
+			While left>0 {
+				Set tChunkSize = $select(left>32000:32000,1:left)
+				Set data = tStream.Read(tChunkSize)
+			
+				Do tFile.Write(data)  ; Save the data to the file
+				Set left = left-$length(data)
+			}
+			
+			Set tSC = tFile.WriteLine("</MsgDomain>")
+			Set tSC = tFile.WriteLine("</MsgFile>")
+ 
+			Set tTempFilename = tFile.Filename
+			Set tFile.Filename="" ; unlink file - prevent delete
+			Kill tFile
+ 
+			// If the target file doesn't exist or is different from the new file, then replace it with the new file
+			Set tOK=1
+			if tExists {
+				Set iDiff = $$FileDiff^EnsUtil(tTempFilename,pFilename,1,.tInfo)
+				if iDiff {
+					if $zBoolean(iDiff,1,1) {
+						Set tSC = $$$ERROR("<%ObjectErrors>MasterStringsNewer",pDomain,pFilename,$Get(tInfo(1)))
+					} else {
+						Set tSC = $$$ERROR("<%ObjectErrors>MasterStringsOlder",pDomain,pFilename,$Get(tInfo(1)))
+					}
+					if iDiff>2 { Set tOK=0 }
+					else {
+						Set tOK = ##class(%File).Delete(pFilename)
+						Set:tOK tSC = $$$ADDSC(tSC,$$$ERROR($$$GeneralError,"Updated "_pFilename_" from XData"))
+					}
+				} else {
+					Do ##class(%File).Delete(tTempFilename)
+					Set tTempFilename=""
+				}
+			}
+			if ""'= tTempFilename && tOK {
+				Set tOK = ##class(%File).Rename(tTempFilename,pFilename)
+				Set:tOK&&'tExists tSC = $$$ADDSC(tSC,$$$ERROR($$$GeneralError,"Created "_pFilename_" from XData"))
+			}
+			if 'tOK Set tSC = $$$ADDSC(tSC,$$$ERROR($$$FileCanNotRename,tTempFilename_" -> "_pFilename))
+		}
+	}
+	Quit tSC
+}
+ 
+getBaseFilename(pBaseFilename,pClassname) public ; (pBaseFilename as %String, pClassname as %String) as %String [Private]
+{
+	if ""=pBaseFilename {
+		Set tPkgCount=$Length(pClassname,".")
+		Set pBaseFilename=$Piece(pClassname,".",tPkgCount-1)_$Piece(pClassname,".",tPkgCount)
+	}
+	Quit pBaseFilename
+}
+ 
+getMasterLanguage(pMasterLanguage, pLanguages) public ; (pMasterLanguage as %String, pLanguages as %String) as %String [Private]
+{
+	Set tLanguage = ""
+	For iLang=1:1:$Length(pLanguages,",") {
+		Set tLang=$Piece(pLanguages,",",iLang)
+		if ""'=tLang {
+			if tLang=pMasterLanguage {
+				Set tLanguage = pMasterLanguage
+				Quit
+			}
+		}
+	}
+	Quit tLanguage
+}
+ 
+getFiles(pDomain,pLanguages,pMasterLanguage,pBaseFilename,pUseMasterExt,pBaseDir,pCompiledClass,pSC) public ; (pDomain as %String, pLanguages as %String, pMasterLanguage as %String, pBaseFilename as %String, pUseMasterExt as %Boolean, pBaseDir as %String, pCompiledClass as %Dictionary.CompiledClass, Output pSC as %Status) as %String [Private]
+{
+	Set tFiles = "",pSC=$$$OK
+	For iLang=1:1:$Length(pLanguages,",") {
+		Set tLang=$Piece(pLanguages,",",iLang)
+		if ""'=tLang {
+			Set tFilename = ""
+			if tLang'=pMasterLanguage { Set tFilename = pBaseDir_pBaseFilename_tLang_".xml" }
+			else {
+				;// If XData exists and not empty, save it to the external filename
+				Set tFilename = pBaseDir_pBaseFilename_$$getExt(tLang,pUseMasterExt)_".xml"
+				Set pSC = $$updateFromXData(tFilename,pMasterLanguage,pDomain,pCompiledClass)
+			}
+			Set tFiles = tFiles_tFilename_","
+		}
+	}
+	if ""'=tFiles Set tFiles=$E(tFiles,1,$L(tFiles)-1) // strip trailing ","
+	Quit tFiles
+}
+ 
+getExt(pMasterLanguage,pUseMasterExt) public {
+	Quit $S(pUseMasterExt:pMasterLanguage,1:"")
+}
+ 
+getBaseDir(pBaseDirParm) public ; (pBaseDirParm as %String) as %String [Private]
+{
+	Quit:""=pBaseDirParm ""
+	Set tPos=0
+	 while 1 {
+		Set tPos=$find(pBaseDirParm,"%envEnsembleDir",tPos)
+	 	If tPos>0 {
+	 		Set tPos1=tPos-$Length("%envEnsembleDir")
+	 		Set $Extract(pBaseDirParm,tPos1,tPos-1)=""""_$$$envEnsembleDir_""""
+	 	}
+	 	else { Quit }
+	}
+	New %tBaseDir
+	Set @("%tBaseDir="_pBaseDirParm)
+	if $$$isUNIX Set %tBaseDir=$TR(%tBaseDir,"\","/")
+	else  Set %tBaseDir=$TR(%tBaseDir,"/","\")
+	Quit %tBaseDir
+}

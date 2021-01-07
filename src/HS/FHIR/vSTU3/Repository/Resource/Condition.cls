@@ -1,0 +1,1038 @@
+Class HS.FHIR.vSTU3.Repository.Resource.Condition Extends (HS.FHIR.vSTU3.Repository.Resource.Abstract, %Persistent) [ Inheritance = left, ProcedureBlock ]
+{
+
+XData SearchParameters
+{
+<Bundle xmlns="http://hl7.org/fhir">
+  <id value="searchParams-Condition"/>
+  <meta>
+    <lastUpdated value="2017-03-21T06:09:53.925+11:00"/>
+  </meta>
+  <type value="collection"/>
+  <entry>
+    <fullUrl value="http://hl7.org/fhir/SearchParameter/Condition-abatement-age"/>
+    <resource>
+      <SearchParameter>
+        <id value="Condition-abatement-age"/>
+        <url value="http://hl7.org/fhir/SearchParameter/Condition-abatement-age"/>
+        <name value="abatement-age"/>
+        <status value="draft"/>
+        <experimental value="false"/>
+        <date value="2017-03-21T06:09:53+11:00"/>
+        <publisher value="Health Level Seven International (Patient Care)"/>
+        <contact>
+          <telecom>
+            <system value="url"/>
+            <value value="http://hl7.org/fhir"/>
+          </telecom>
+        </contact>
+        <contact>
+          <telecom>
+            <system value="url"/>
+            <value value="http://www.hl7.org/Special/committees/patientcare/index.cfm"/>
+          </telecom>
+        </contact>
+        <code value="abatement-age"/>
+        <base value="Condition"/>
+        <type value="quantity"/>
+        <description value="Abatement as age or age range"/>
+        <expression value="Condition.abatement.as(Age) | Condition.abatement.as(Range) | Condition.abatement.as(Age)"/>
+        <xpath value="f:Condition/f:abatementAge | f:Condition/f:abatementRange"/>
+        <xpathUsage value="normal"/>
+      </SearchParameter>
+    </resource>
+  </entry>
+  <entry>
+    <fullUrl value="http://hl7.org/fhir/SearchParameter/Condition-abatement-boolean"/>
+    <resource>
+      <SearchParameter>
+        <id value="Condition-abatement-boolean"/>
+        <url value="http://hl7.org/fhir/SearchParameter/Condition-abatement-boolean"/>
+        <name value="abatement-boolean"/>
+        <status value="draft"/>
+        <experimental value="false"/>
+        <date value="2017-03-21T06:09:53+11:00"/>
+        <publisher value="Health Level Seven International (Patient Care)"/>
+        <contact>
+          <telecom>
+            <system value="url"/>
+            <value value="http://hl7.org/fhir"/>
+          </telecom>
+        </contact>
+        <contact>
+          <telecom>
+            <system value="url"/>
+            <value value="http://www.hl7.org/Special/committees/patientcare/index.cfm"/>
+          </telecom>
+        </contact>
+        <code value="abatement-boolean"/>
+        <base value="Condition"/>
+        <type value="token"/>
+        <description value="Abatement boolean (boolean is true or non-boolean values are present)"/>
+        <expression value="Condition.abatement.as(boolean) | Condition.abatement.is(dateTime) | Condition.abatement.is(Age) | Condition.abatement.is(Period) | Condition.abatement.is(Range) | Condition.abatement.is(string)"/>
+        <xpath value="f:Condition/f:abatementDateTime | f:Condition/f:abatementAge | f:Condition/f:abatementBoolean | f:Condition/f:abatementPeriod | f:Condition/f:abatementRange | f:Condition/f:abatementString"/>
+        <xpathUsage value="normal"/>
+      </SearchParameter>
+    </resource>
+  </entry>
+  <entry>
+    <fullUrl value="http://hl7.org/fhir/SearchParameter/Condition-abatement-date"/>
+    <resource>
+      <SearchParameter>
+        <id value="Condition-abatement-date"/>
+        <url value="http://hl7.org/fhir/SearchParameter/Condition-abatement-date"/>
+        <name value="abatement-date"/>
+        <status value="draft"/>
+        <experimental value="false"/>
+        <date value="2017-03-21T06:09:53+11:00"/>
+        <publisher value="Health Level Seven International (Patient Care)"/>
+        <contact>
+          <telecom>
+            <system value="url"/>
+            <value value="http://hl7.org/fhir"/>
+          </telecom>
+        </contact>
+        <contact>
+          <telecom>
+            <system value="url"/>
+            <value value="http://www.hl7.org/Special/committees/patientcare/index.cfm"/>
+          </telecom>
+        </contact>
+        <code value="abatement-date"/>
+        <base value="Condition"/>
+        <type value="date"/>
+        <description value="Date-related abatements (dateTime and period)"/>
+        <expression value="Condition.abatement.as(dateTime) | Condition.abatement.as(Period)"/>
+        <xpath value="f:Condition/f:abatementDateTime | f:Condition/f:abatementPeriod"/>
+        <xpathUsage value="normal"/>
+      </SearchParameter>
+    </resource>
+  </entry>
+  <entry>
+    <fullUrl value="http://hl7.org/fhir/SearchParameter/Condition-abatement-string"/>
+    <resource>
+      <SearchParameter>
+        <id value="Condition-abatement-string"/>
+        <url value="http://hl7.org/fhir/SearchParameter/Condition-abatement-string"/>
+        <name value="abatement-string"/>
+        <status value="draft"/>
+        <experimental value="false"/>
+        <date value="2017-03-21T06:09:53+11:00"/>
+        <publisher value="Health Level Seven International (Patient Care)"/>
+        <contact>
+          <telecom>
+            <system value="url"/>
+            <value value="http://hl7.org/fhir"/>
+          </telecom>
+        </contact>
+        <contact>
+          <telecom>
+            <system value="url"/>
+            <value value="http://www.hl7.org/Special/committees/patientcare/index.cfm"/>
+          </telecom>
+        </contact>
+        <code value="abatement-string"/>
+        <base value="Condition"/>
+        <type value="string"/>
+        <description value="Abatement as a string"/>
+        <expression value="Condition.abatement.as(string)"/>
+        <xpath value="f:Condition/f:abatementString"/>
+        <xpathUsage value="normal"/>
+      </SearchParameter>
+    </resource>
+  </entry>
+  <entry>
+    <fullUrl value="http://hl7.org/fhir/SearchParameter/Condition-asserted-date"/>
+    <resource>
+      <SearchParameter>
+        <id value="Condition-asserted-date"/>
+        <url value="http://hl7.org/fhir/SearchParameter/Condition-asserted-date"/>
+        <name value="asserted-date"/>
+        <status value="draft"/>
+        <experimental value="false"/>
+        <date value="2017-03-21T06:09:53+11:00"/>
+        <publisher value="Health Level Seven International (Patient Care)"/>
+        <contact>
+          <telecom>
+            <system value="url"/>
+            <value value="http://hl7.org/fhir"/>
+          </telecom>
+        </contact>
+        <contact>
+          <telecom>
+            <system value="url"/>
+            <value value="http://www.hl7.org/Special/committees/patientcare/index.cfm"/>
+          </telecom>
+        </contact>
+        <code value="asserted-date"/>
+        <base value="Condition"/>
+        <type value="date"/>
+        <description value="Date record was believed accurate"/>
+        <expression value="Condition.assertedDate"/>
+        <xpath value="f:Condition/f:assertedDate"/>
+        <xpathUsage value="normal"/>
+      </SearchParameter>
+    </resource>
+  </entry>
+  <entry>
+    <fullUrl value="http://hl7.org/fhir/SearchParameter/Condition-asserter"/>
+    <resource>
+      <SearchParameter>
+        <id value="Condition-asserter"/>
+        <url value="http://hl7.org/fhir/SearchParameter/Condition-asserter"/>
+        <name value="asserter"/>
+        <status value="draft"/>
+        <experimental value="false"/>
+        <date value="2017-03-21T06:09:53+11:00"/>
+        <publisher value="Health Level Seven International (Patient Care)"/>
+        <contact>
+          <telecom>
+            <system value="url"/>
+            <value value="http://hl7.org/fhir"/>
+          </telecom>
+        </contact>
+        <contact>
+          <telecom>
+            <system value="url"/>
+            <value value="http://www.hl7.org/Special/committees/patientcare/index.cfm"/>
+          </telecom>
+        </contact>
+        <code value="asserter"/>
+        <base value="Condition"/>
+        <type value="reference"/>
+        <description value="Person who asserts this condition"/>
+        <expression value="Condition.asserter"/>
+        <xpath value="f:Condition/f:asserter"/>
+        <xpathUsage value="normal"/>
+        <target value="Practitioner"/>
+        <target value="Patient"/>
+        <target value="RelatedPerson"/>
+      </SearchParameter>
+    </resource>
+  </entry>
+  <entry>
+    <fullUrl value="http://hl7.org/fhir/SearchParameter/Condition-body-site"/>
+    <resource>
+      <SearchParameter>
+        <id value="Condition-body-site"/>
+        <url value="http://hl7.org/fhir/SearchParameter/Condition-body-site"/>
+        <name value="body-site"/>
+        <status value="draft"/>
+        <experimental value="false"/>
+        <date value="2017-03-21T06:09:53+11:00"/>
+        <publisher value="Health Level Seven International (Patient Care)"/>
+        <contact>
+          <telecom>
+            <system value="url"/>
+            <value value="http://hl7.org/fhir"/>
+          </telecom>
+        </contact>
+        <contact>
+          <telecom>
+            <system value="url"/>
+            <value value="http://www.hl7.org/Special/committees/patientcare/index.cfm"/>
+          </telecom>
+        </contact>
+        <code value="body-site"/>
+        <base value="Condition"/>
+        <type value="token"/>
+        <description value="Anatomical location, if relevant"/>
+        <expression value="Condition.bodySite"/>
+        <xpath value="f:Condition/f:bodySite"/>
+        <xpathUsage value="normal"/>
+      </SearchParameter>
+    </resource>
+  </entry>
+  <entry>
+    <fullUrl value="http://hl7.org/fhir/SearchParameter/Condition-category"/>
+    <resource>
+      <SearchParameter>
+        <id value="Condition-category"/>
+        <url value="http://hl7.org/fhir/SearchParameter/Condition-category"/>
+        <name value="category"/>
+        <status value="draft"/>
+        <experimental value="false"/>
+        <date value="2017-03-21T06:09:53+11:00"/>
+        <publisher value="Health Level Seven International (Patient Care)"/>
+        <contact>
+          <telecom>
+            <system value="url"/>
+            <value value="http://hl7.org/fhir"/>
+          </telecom>
+        </contact>
+        <contact>
+          <telecom>
+            <system value="url"/>
+            <value value="http://www.hl7.org/Special/committees/patientcare/index.cfm"/>
+          </telecom>
+        </contact>
+        <code value="category"/>
+        <base value="Condition"/>
+        <type value="token"/>
+        <description value="The category of the condition"/>
+        <expression value="Condition.category"/>
+        <xpath value="f:Condition/f:category"/>
+        <xpathUsage value="normal"/>
+      </SearchParameter>
+    </resource>
+  </entry>
+  <entry>
+    <fullUrl value="http://hl7.org/fhir/SearchParameter/Condition-clinical-status"/>
+    <resource>
+      <SearchParameter>
+        <id value="Condition-clinical-status"/>
+        <url value="http://hl7.org/fhir/SearchParameter/Condition-clinical-status"/>
+        <name value="clinical-status"/>
+        <status value="draft"/>
+        <experimental value="false"/>
+        <date value="2017-03-21T06:09:53+11:00"/>
+        <publisher value="Health Level Seven International (Patient Care)"/>
+        <contact>
+          <telecom>
+            <system value="url"/>
+            <value value="http://hl7.org/fhir"/>
+          </telecom>
+        </contact>
+        <contact>
+          <telecom>
+            <system value="url"/>
+            <value value="http://www.hl7.org/Special/committees/patientcare/index.cfm"/>
+          </telecom>
+        </contact>
+        <code value="clinical-status"/>
+        <base value="Condition"/>
+        <type value="token"/>
+        <description value="The clinical status of the condition"/>
+        <expression value="Condition.clinicalStatus"/>
+        <xpath value="f:Condition/f:clinicalStatus"/>
+        <xpathUsage value="normal"/>
+      </SearchParameter>
+    </resource>
+  </entry>
+  <entry>
+    <fullUrl value="http://hl7.org/fhir/SearchParameter/clinical-code"/>
+    <resource>
+      <SearchParameter>
+        <id value="clinical-code"/>
+        <url value="http://hl7.org/fhir/SearchParameter/clinical-code"/>
+        <name value="code"/>
+        <status value="draft"/>
+        <experimental value="false"/>
+        <date value="2017-03-21T06:09:53+11:00"/>
+        <publisher value="Health Level Seven International (Patient Care)"/>
+        <contact>
+          <telecom>
+            <system value="url"/>
+            <value value="http://hl7.org/fhir"/>
+          </telecom>
+        </contact>
+        <contact>
+          <telecom>
+            <system value="url"/>
+            <value value="http://www.hl7.org/Special/committees/patientcare/index.cfm"/>
+          </telecom>
+        </contact>
+        <code value="code"/>
+        <base value="FamilyMemberHistory"/>
+        <base value="DeviceRequest"/>
+        <base value="AllergyIntolerance"/>
+        <base value="Procedure"/>
+        <base value="List"/>
+        <base value="ProcedureRequest"/>
+        <base value="Observation"/>
+        <base value="DiagnosticReport"/>
+        <base value="Condition"/>
+        <type value="token"/>
+        <description value="Multiple Resources: 
+
+* [FamilyMemberHistory](familymemberhistory.html): A search by a condition code
+* [DeviceRequest](devicerequest.html): Code for what is being requested/ordered
+* [AllergyIntolerance](allergyintolerance.html): Code that identifies the allergy or intolerance
+* [Procedure](procedure.html): A code to identify a  procedure
+* [List](list.html): What the purpose of this list is
+* [ProcedureRequest](procedurerequest.html): What is being requested/ordered
+* [Observation](observation.html): The code of the observation type
+* [DiagnosticReport](diagnosticreport.html): The code for the report as a whole, as opposed to codes for the atomic results, which are the names on the observation resource referred to from the result
+* [Condition](condition.html): Code for the condition
+"/>
+        <expression value="FamilyMemberHistory.condition.code | DeviceRequest.code.as(CodeableConcept) | AllergyIntolerance.code | AllergyIntolerance.reaction.substance | Procedure.code | List.code | ProcedureRequest.code | Observation.code | DiagnosticReport.code | Condition.code"/>
+        <xpath value="f:FamilyMemberHistory/f:condition/f:code | f:DeviceRequest/f:codeCodeableConcept | f:AllergyIntolerance/f:code | f:AllergyIntolerance/f:reaction/f:substance | f:Procedure/f:code | f:List/f:code | f:ProcedureRequest/f:code | f:Observation/f:code | f:DiagnosticReport/f:code | f:Condition/f:code"/>
+        <xpathUsage value="normal"/>
+      </SearchParameter>
+    </resource>
+  </entry>
+  <entry>
+    <fullUrl value="http://hl7.org/fhir/SearchParameter/Condition-context"/>
+    <resource>
+      <SearchParameter>
+        <id value="Condition-context"/>
+        <url value="http://hl7.org/fhir/SearchParameter/Condition-context"/>
+        <name value="context"/>
+        <status value="draft"/>
+        <experimental value="false"/>
+        <date value="2017-03-21T06:09:53+11:00"/>
+        <publisher value="Health Level Seven International (Patient Care)"/>
+        <contact>
+          <telecom>
+            <system value="url"/>
+            <value value="http://hl7.org/fhir"/>
+          </telecom>
+        </contact>
+        <contact>
+          <telecom>
+            <system value="url"/>
+            <value value="http://www.hl7.org/Special/committees/patientcare/index.cfm"/>
+          </telecom>
+        </contact>
+        <code value="context"/>
+        <base value="Condition"/>
+        <type value="reference"/>
+        <description value="Encounter or episode when condition first asserted"/>
+        <expression value="Condition.context"/>
+        <xpath value="f:Condition/f:context"/>
+        <xpathUsage value="normal"/>
+        <target value="EpisodeOfCare"/>
+        <target value="Encounter"/>
+      </SearchParameter>
+    </resource>
+  </entry>
+  <entry>
+    <fullUrl value="http://hl7.org/fhir/SearchParameter/Condition-encounter"/>
+    <resource>
+      <SearchParameter>
+        <id value="Condition-encounter"/>
+        <url value="http://hl7.org/fhir/SearchParameter/Condition-encounter"/>
+        <name value="encounter"/>
+        <status value="draft"/>
+        <experimental value="false"/>
+        <date value="2017-03-21T06:09:53+11:00"/>
+        <publisher value="Health Level Seven International (Patient Care)"/>
+        <contact>
+          <telecom>
+            <system value="url"/>
+            <value value="http://hl7.org/fhir"/>
+          </telecom>
+        </contact>
+        <contact>
+          <telecom>
+            <system value="url"/>
+            <value value="http://www.hl7.org/Special/committees/patientcare/index.cfm"/>
+          </telecom>
+        </contact>
+        <code value="encounter"/>
+        <base value="Condition"/>
+        <type value="reference"/>
+        <description value="Encounter when condition first asserted"/>
+        <expression value="Condition.context"/>
+        <xpath value="f:Condition/f:context"/>
+        <xpathUsage value="normal"/>
+        <target value="Encounter"/>
+      </SearchParameter>
+    </resource>
+  </entry>
+  <entry>
+    <fullUrl value="http://hl7.org/fhir/SearchParameter/Condition-evidence"/>
+    <resource>
+      <SearchParameter>
+        <id value="Condition-evidence"/>
+        <url value="http://hl7.org/fhir/SearchParameter/Condition-evidence"/>
+        <name value="evidence"/>
+        <status value="draft"/>
+        <experimental value="false"/>
+        <date value="2017-03-21T06:09:53+11:00"/>
+        <publisher value="Health Level Seven International (Patient Care)"/>
+        <contact>
+          <telecom>
+            <system value="url"/>
+            <value value="http://hl7.org/fhir"/>
+          </telecom>
+        </contact>
+        <contact>
+          <telecom>
+            <system value="url"/>
+            <value value="http://www.hl7.org/Special/committees/patientcare/index.cfm"/>
+          </telecom>
+        </contact>
+        <code value="evidence"/>
+        <base value="Condition"/>
+        <type value="token"/>
+        <description value="Manifestation/symptom"/>
+        <expression value="Condition.evidence.code"/>
+        <xpath value="f:Condition/f:evidence/f:code"/>
+        <xpathUsage value="normal"/>
+      </SearchParameter>
+    </resource>
+  </entry>
+  <entry>
+    <fullUrl value="http://hl7.org/fhir/SearchParameter/Condition-evidence-detail"/>
+    <resource>
+      <SearchParameter>
+        <id value="Condition-evidence-detail"/>
+        <url value="http://hl7.org/fhir/SearchParameter/Condition-evidence-detail"/>
+        <name value="evidence-detail"/>
+        <status value="draft"/>
+        <experimental value="false"/>
+        <date value="2017-03-21T06:09:53+11:00"/>
+        <publisher value="Health Level Seven International (Patient Care)"/>
+        <contact>
+          <telecom>
+            <system value="url"/>
+            <value value="http://hl7.org/fhir"/>
+          </telecom>
+        </contact>
+        <contact>
+          <telecom>
+            <system value="url"/>
+            <value value="http://www.hl7.org/Special/committees/patientcare/index.cfm"/>
+          </telecom>
+        </contact>
+        <code value="evidence-detail"/>
+        <base value="Condition"/>
+        <type value="reference"/>
+        <description value="Supporting information found elsewhere"/>
+        <expression value="Condition.evidence.detail"/>
+        <xpath value="f:Condition/f:evidence/f:detail"/>
+        <xpathUsage value="normal"/>
+        <target value="Account"/>
+        <target value="ActivityDefinition"/>
+        <target value="AdverseEvent"/>
+        <target value="AllergyIntolerance"/>
+        <target value="Appointment"/>
+        <target value="AppointmentResponse"/>
+        <target value="AuditEvent"/>
+        <target value="Basic"/>
+        <target value="Binary"/>
+        <target value="BodySite"/>
+        <target value="Bundle"/>
+        <target value="CapabilityStatement"/>
+        <target value="CarePlan"/>
+        <target value="CareTeam"/>
+        <target value="ChargeItem"/>
+        <target value="Claim"/>
+        <target value="ClaimResponse"/>
+        <target value="ClinicalImpression"/>
+        <target value="CodeSystem"/>
+        <target value="Communication"/>
+        <target value="CommunicationRequest"/>
+        <target value="CompartmentDefinition"/>
+        <target value="Composition"/>
+        <target value="ConceptMap"/>
+        <target value="Condition"/>
+        <target value="Consent"/>
+        <target value="Contract"/>
+        <target value="Coverage"/>
+        <target value="DataElement"/>
+        <target value="DetectedIssue"/>
+        <target value="Device"/>
+        <target value="DeviceComponent"/>
+        <target value="DeviceMetric"/>
+        <target value="DeviceRequest"/>
+        <target value="DeviceUseStatement"/>
+        <target value="DiagnosticReport"/>
+        <target value="DocumentManifest"/>
+        <target value="DocumentReference"/>
+        <target value="EligibilityRequest"/>
+        <target value="EligibilityResponse"/>
+        <target value="Encounter"/>
+        <target value="Endpoint"/>
+        <target value="EnrollmentRequest"/>
+        <target value="EnrollmentResponse"/>
+        <target value="EpisodeOfCare"/>
+        <target value="ExpansionProfile"/>
+        <target value="ExplanationOfBenefit"/>
+        <target value="FamilyMemberHistory"/>
+        <target value="Flag"/>
+        <target value="Goal"/>
+        <target value="GraphDefinition"/>
+        <target value="Group"/>
+        <target value="GuidanceResponse"/>
+        <target value="HealthcareService"/>
+        <target value="ImagingManifest"/>
+        <target value="ImagingStudy"/>
+        <target value="Immunization"/>
+        <target value="ImmunizationRecommendation"/>
+        <target value="ImplementationGuide"/>
+        <target value="Library"/>
+        <target value="Linkage"/>
+        <target value="List"/>
+        <target value="Location"/>
+        <target value="Measure"/>
+        <target value="MeasureReport"/>
+        <target value="Media"/>
+        <target value="Medication"/>
+        <target value="MedicationAdministration"/>
+        <target value="MedicationDispense"/>
+        <target value="MedicationRequest"/>
+        <target value="MedicationStatement"/>
+        <target value="MessageDefinition"/>
+        <target value="MessageHeader"/>
+        <target value="NamingSystem"/>
+        <target value="NutritionOrder"/>
+        <target value="Observation"/>
+        <target value="OperationDefinition"/>
+        <target value="OperationOutcome"/>
+        <target value="Organization"/>
+        <target value="Patient"/>
+        <target value="PaymentNotice"/>
+        <target value="PaymentReconciliation"/>
+        <target value="Person"/>
+        <target value="PlanDefinition"/>
+        <target value="Practitioner"/>
+        <target value="PractitionerRole"/>
+        <target value="Procedure"/>
+        <target value="ProcedureRequest"/>
+        <target value="ProcessRequest"/>
+        <target value="ProcessResponse"/>
+        <target value="Provenance"/>
+        <target value="Questionnaire"/>
+        <target value="QuestionnaireResponse"/>
+        <target value="ReferralRequest"/>
+        <target value="RelatedPerson"/>
+        <target value="RequestGroup"/>
+        <target value="ResearchStudy"/>
+        <target value="ResearchSubject"/>
+        <target value="RiskAssessment"/>
+        <target value="Schedule"/>
+        <target value="SearchParameter"/>
+        <target value="Sequence"/>
+        <target value="ServiceDefinition"/>
+        <target value="Slot"/>
+        <target value="Specimen"/>
+        <target value="StructureDefinition"/>
+        <target value="StructureMap"/>
+        <target value="Subscription"/>
+        <target value="Substance"/>
+        <target value="SupplyDelivery"/>
+        <target value="SupplyRequest"/>
+        <target value="Task"/>
+        <target value="TestReport"/>
+        <target value="TestScript"/>
+        <target value="ValueSet"/>
+        <target value="VisionPrescription"/>
+      </SearchParameter>
+    </resource>
+  </entry>
+  <entry>
+    <fullUrl value="http://hl7.org/fhir/SearchParameter/clinical-identifier"/>
+    <resource>
+      <SearchParameter>
+        <id value="clinical-identifier"/>
+        <url value="http://hl7.org/fhir/SearchParameter/clinical-identifier"/>
+        <name value="identifier"/>
+        <status value="draft"/>
+        <experimental value="false"/>
+        <date value="2017-03-21T06:09:53+11:00"/>
+        <publisher value="Health Level Seven International (Structured Documents)"/>
+        <contact>
+          <telecom>
+            <system value="url"/>
+            <value value="http://hl7.org/fhir"/>
+          </telecom>
+        </contact>
+        <contact>
+          <telecom>
+            <system value="url"/>
+            <value value="http://www.hl7.org/Special/committees/structure/index.cfm"/>
+          </telecom>
+        </contact>
+        <code value="identifier"/>
+        <base value="DocumentManifest"/>
+        <base value="Goal"/>
+        <base value="Consent"/>
+        <base value="DocumentReference"/>
+        <base value="SupplyRequest"/>
+        <base value="RiskAssessment"/>
+        <base value="CareTeam"/>
+        <base value="ImagingStudy"/>
+        <base value="FamilyMemberHistory"/>
+        <base value="Encounter"/>
+        <base value="DeviceRequest"/>
+        <base value="AllergyIntolerance"/>
+        <base value="CarePlan"/>
+        <base value="EpisodeOfCare"/>
+        <base value="Procedure"/>
+        <base value="List"/>
+        <base value="Immunization"/>
+        <base value="VisionPrescription"/>
+        <base value="ProcedureRequest"/>
+        <base value="Observation"/>
+        <base value="DiagnosticReport"/>
+        <base value="NutritionOrder"/>
+        <base value="Condition"/>
+        <base value="Composition"/>
+        <base value="DetectedIssue"/>
+        <base value="SupplyDelivery"/>
+        <type value="token"/>
+        <description value="Multiple Resources: 
+
+* [DocumentManifest](documentmanifest.html): Unique Identifier for the set of documents
+* [Goal](goal.html): External Ids for this goal
+* [Consent](consent.html): Identifier for this record (external references)
+* [DocumentReference](documentreference.html): Master Version Specific Identifier
+* [SupplyRequest](supplyrequest.html): Unique identifier
+* [RiskAssessment](riskassessment.html): Unique identifier for the assessment
+* [CareTeam](careteam.html): External Ids for this team
+* [ImagingStudy](imagingstudy.html): Other identifiers for the Study
+* [FamilyMemberHistory](familymemberhistory.html): A search by a record identifier
+* [Encounter](encounter.html): Identifier(s) by which this encounter is known
+* [DeviceRequest](devicerequest.html): Business identifier for request/order
+* [AllergyIntolerance](allergyintolerance.html): External ids for this item
+* [CarePlan](careplan.html): External Ids for this plan
+* [EpisodeOfCare](episodeofcare.html): Business Identifier(s) relevant for this EpisodeOfCare
+* [Procedure](procedure.html): A unique identifier for a procedure
+* [List](list.html): Business identifier
+* [Immunization](immunization.html): Business identifier
+* [VisionPrescription](visionprescription.html): Return prescriptions with this external identifier
+* [ProcedureRequest](procedurerequest.html): Identifiers assigned to this order
+* [Observation](observation.html): The unique id for a particular observation
+* [DiagnosticReport](diagnosticreport.html): An identifier for the report
+* [NutritionOrder](nutritionorder.html): Return nutrition orders with this external identifier
+* [Condition](condition.html): A unique identifier of the condition record
+* [Composition](composition.html): Logical identifier of composition (version-independent)
+* [DetectedIssue](detectedissue.html): Unique id for the detected issue
+* [SupplyDelivery](supplydelivery.html): External identifier
+"/>
+        <expression value="DocumentManifest.masterIdentifier | DocumentManifest.identifier | Goal.identifier | Consent.identifier | DocumentReference.masterIdentifier | DocumentReference.identifier | SupplyRequest.identifier | RiskAssessment.identifier | CareTeam.identifier | ImagingStudy.identifier | FamilyMemberHistory.identifier | Encounter.identifier | DeviceRequest.identifier | AllergyIntolerance.identifier | CarePlan.identifier | EpisodeOfCare.identifier | Procedure.identifier | List.identifier | Immunization.identifier | VisionPrescription.identifier | ProcedureRequest.identifier | Observation.identifier | DiagnosticReport.identifier | NutritionOrder.identifier | Condition.identifier | Composition.identifier | DetectedIssue.identifier | SupplyDelivery.identifier"/>
+        <xpath value="f:DocumentManifest/f:masterIdentifier | f:DocumentManifest/f:identifier | f:Goal/f:identifier | f:Consent/f:identifier | f:DocumentReference/f:masterIdentifier | f:DocumentReference/f:identifier | f:SupplyRequest/f:identifier | f:RiskAssessment/f:identifier | f:CareTeam/f:identifier | f:ImagingStudy/f:identifier | f:FamilyMemberHistory/f:identifier | f:Encounter/f:identifier | f:DeviceRequest/f:identifier | f:AllergyIntolerance/f:identifier | f:CarePlan/f:identifier | f:EpisodeOfCare/f:identifier | f:Procedure/f:identifier | f:List/f:identifier | f:Immunization/f:identifier | f:VisionPrescription/f:identifier | f:ProcedureRequest/f:identifier | f:Observation/f:identifier | f:DiagnosticReport/f:identifier | f:NutritionOrder/f:identifier | f:Condition/f:identifier | f:Composition/f:identifier | f:DetectedIssue/f:identifier | f:SupplyDelivery/f:identifier"/>
+        <xpathUsage value="normal"/>
+      </SearchParameter>
+    </resource>
+  </entry>
+  <entry>
+    <fullUrl value="http://hl7.org/fhir/SearchParameter/Condition-onset-age"/>
+    <resource>
+      <SearchParameter>
+        <id value="Condition-onset-age"/>
+        <url value="http://hl7.org/fhir/SearchParameter/Condition-onset-age"/>
+        <name value="onset-age"/>
+        <status value="draft"/>
+        <experimental value="false"/>
+        <date value="2017-03-21T06:09:53+11:00"/>
+        <publisher value="Health Level Seven International (Patient Care)"/>
+        <contact>
+          <telecom>
+            <system value="url"/>
+            <value value="http://hl7.org/fhir"/>
+          </telecom>
+        </contact>
+        <contact>
+          <telecom>
+            <system value="url"/>
+            <value value="http://www.hl7.org/Special/committees/patientcare/index.cfm"/>
+          </telecom>
+        </contact>
+        <code value="onset-age"/>
+        <base value="Condition"/>
+        <type value="quantity"/>
+        <description value="Onsets as age or age range"/>
+        <expression value="Condition.onset.as(Age) | Condition.onset.as(Range)"/>
+        <xpath value="f:Condition/f:onsetAge | f:Condition/f:onsetRange"/>
+        <xpathUsage value="normal"/>
+      </SearchParameter>
+    </resource>
+  </entry>
+  <entry>
+    <fullUrl value="http://hl7.org/fhir/SearchParameter/Condition-onset-date"/>
+    <resource>
+      <SearchParameter>
+        <id value="Condition-onset-date"/>
+        <url value="http://hl7.org/fhir/SearchParameter/Condition-onset-date"/>
+        <name value="onset-date"/>
+        <status value="draft"/>
+        <experimental value="false"/>
+        <date value="2017-03-21T06:09:53+11:00"/>
+        <publisher value="Health Level Seven International (Patient Care)"/>
+        <contact>
+          <telecom>
+            <system value="url"/>
+            <value value="http://hl7.org/fhir"/>
+          </telecom>
+        </contact>
+        <contact>
+          <telecom>
+            <system value="url"/>
+            <value value="http://www.hl7.org/Special/committees/patientcare/index.cfm"/>
+          </telecom>
+        </contact>
+        <code value="onset-date"/>
+        <base value="Condition"/>
+        <type value="date"/>
+        <description value="Date related onsets (dateTime and Period)"/>
+        <expression value="Condition.onset.as(dateTime) | Condition.onset.as(Period)"/>
+        <xpath value="f:Condition/f:onsetDateTime | f:Condition/f:onsetPeriod"/>
+        <xpathUsage value="normal"/>
+      </SearchParameter>
+    </resource>
+  </entry>
+  <entry>
+    <fullUrl value="http://hl7.org/fhir/SearchParameter/Condition-onset-info"/>
+    <resource>
+      <SearchParameter>
+        <id value="Condition-onset-info"/>
+        <url value="http://hl7.org/fhir/SearchParameter/Condition-onset-info"/>
+        <name value="onset-info"/>
+        <status value="draft"/>
+        <experimental value="false"/>
+        <date value="2017-03-21T06:09:53+11:00"/>
+        <publisher value="Health Level Seven International (Patient Care)"/>
+        <contact>
+          <telecom>
+            <system value="url"/>
+            <value value="http://hl7.org/fhir"/>
+          </telecom>
+        </contact>
+        <contact>
+          <telecom>
+            <system value="url"/>
+            <value value="http://www.hl7.org/Special/committees/patientcare/index.cfm"/>
+          </telecom>
+        </contact>
+        <code value="onset-info"/>
+        <base value="Condition"/>
+        <type value="string"/>
+        <description value="Onsets as a string"/>
+        <expression value="Condition.onset.as(string)"/>
+        <xpath value="f:Condition/f:onsetString"/>
+        <xpathUsage value="normal"/>
+      </SearchParameter>
+    </resource>
+  </entry>
+  <entry>
+    <fullUrl value="http://hl7.org/fhir/SearchParameter/clinical-patient"/>
+    <resource>
+      <SearchParameter>
+        <id value="clinical-patient"/>
+        <url value="http://hl7.org/fhir/SearchParameter/clinical-patient"/>
+        <name value="patient"/>
+        <status value="draft"/>
+        <experimental value="false"/>
+        <date value="2017-03-21T06:09:53+11:00"/>
+        <publisher value="Health Level Seven International (Patient Care)"/>
+        <contact>
+          <telecom>
+            <system value="url"/>
+            <value value="http://hl7.org/fhir"/>
+          </telecom>
+        </contact>
+        <contact>
+          <telecom>
+            <system value="url"/>
+            <value value="http://www.hl7.org/Special/committees/patientcare/index.cfm"/>
+          </telecom>
+        </contact>
+        <code value="patient"/>
+        <base value="ReferralRequest"/>
+        <base value="DocumentManifest"/>
+        <base value="Goal"/>
+        <base value="Consent"/>
+        <base value="DocumentReference"/>
+        <base value="ImagingManifest"/>
+        <base value="RiskAssessment"/>
+        <base value="CareTeam"/>
+        <base value="ImagingStudy"/>
+        <base value="FamilyMemberHistory"/>
+        <base value="Encounter"/>
+        <base value="DeviceUseStatement"/>
+        <base value="DeviceRequest"/>
+        <base value="AllergyIntolerance"/>
+        <base value="CarePlan"/>
+        <base value="EpisodeOfCare"/>
+        <base value="Procedure"/>
+        <base value="List"/>
+        <base value="Immunization"/>
+        <base value="VisionPrescription"/>
+        <base value="ProcedureRequest"/>
+        <base value="Flag"/>
+        <base value="Observation"/>
+        <base value="DiagnosticReport"/>
+        <base value="NutritionOrder"/>
+        <base value="Condition"/>
+        <base value="Composition"/>
+        <base value="DetectedIssue"/>
+        <base value="SupplyDelivery"/>
+        <base value="ClinicalImpression"/>
+        <type value="reference"/>
+        <description value="Multiple Resources: 
+
+* [ReferralRequest](referralrequest.html): Who the referral is about
+* [DocumentManifest](documentmanifest.html): The subject of the set of documents
+* [Goal](goal.html): Who this goal is intended for
+* [Consent](consent.html): Who the consent applies to
+* [DocumentReference](documentreference.html): Who/what is the subject of the document
+* [ImagingManifest](imagingmanifest.html): Subject of the ImagingManifest (or a DICOM Key Object Selection which it represents)
+* [RiskAssessment](riskassessment.html): Who/what does assessment apply to?
+* [CareTeam](careteam.html): Who care team is for
+* [ImagingStudy](imagingstudy.html): Who the study is about
+* [FamilyMemberHistory](familymemberhistory.html): The identity of a subject to list family member history items for
+* [Encounter](encounter.html): The patient ro group present at the encounter
+* [DeviceUseStatement](deviceusestatement.html): Search by subject - a patient
+* [DeviceRequest](devicerequest.html): Individual the service is ordered for
+* [AllergyIntolerance](allergyintolerance.html): Who the sensitivity is for
+* [CarePlan](careplan.html): Who care plan is for
+* [EpisodeOfCare](episodeofcare.html): The patient who is the focus of this episode of care
+* [Procedure](procedure.html): Search by subject - a patient
+* [List](list.html): If all resources have the same subject
+* [Immunization](immunization.html): The patient for the vaccination record
+* [VisionPrescription](visionprescription.html): The identity of a patient to list dispenses for
+* [ProcedureRequest](procedurerequest.html): Search by subject - a patient
+* [Flag](flag.html): The identity of a subject to list flags for
+* [Observation](observation.html): The subject that the observation is about (if patient)
+* [DiagnosticReport](diagnosticreport.html): The subject of the report if a patient
+* [NutritionOrder](nutritionorder.html): The identity of the person who requires the diet, formula or nutritional supplement
+* [Condition](condition.html): Who has the condition?
+* [Composition](composition.html): Who and/or what the composition is about
+* [DetectedIssue](detectedissue.html): Associated patient
+* [SupplyDelivery](supplydelivery.html): Patient for whom the item is supplied
+* [ClinicalImpression](clinicalimpression.html): Patient or group assessed
+"/>
+        <expression value="ReferralRequest.subject | DocumentManifest.subject | Goal.subject | Consent.patient | DocumentReference.subject | ImagingManifest.patient | RiskAssessment.subject | CareTeam.subject | ImagingStudy.patient | FamilyMemberHistory.patient | Encounter.subject | DeviceUseStatement.subject | DeviceRequest.subject | AllergyIntolerance.patient | CarePlan.subject | EpisodeOfCare.patient | Procedure.subject | List.subject | Immunization.patient | VisionPrescription.patient | ProcedureRequest.subject | Flag.subject | Observation.subject | DiagnosticReport.subject | NutritionOrder.patient | Condition.subject | Composition.subject | DetectedIssue.patient | SupplyDelivery.patient | ClinicalImpression.subject"/>
+        <xpath value="f:ReferralRequest/f:subject | f:DocumentManifest/f:subject | f:Goal/f:subject | f:Consent/f:patient | f:DocumentReference/f:subject | f:ImagingManifest/f:patient | f:RiskAssessment/f:subject | f:CareTeam/f:subject | f:ImagingStudy/f:patient | f:FamilyMemberHistory/f:patient | f:Encounter/f:subject | f:DeviceUseStatement/f:subject | f:DeviceRequest/f:subject | f:AllergyIntolerance/f:patient | f:CarePlan/f:subject | f:EpisodeOfCare/f:patient | f:Procedure/f:subject | f:List/f:subject | f:Immunization/f:patient | f:VisionPrescription/f:patient | f:ProcedureRequest/f:subject | f:Flag/f:subject | f:Observation/f:subject | f:DiagnosticReport/f:subject | f:NutritionOrder/f:patient | f:Condition/f:subject | f:Composition/f:subject | f:DetectedIssue/f:patient | f:SupplyDelivery/f:patient | f:ClinicalImpression/f:subject"/>
+        <xpathUsage value="normal"/>
+        <target value="Patient"/>
+        <target value="Group"/>
+      </SearchParameter>
+    </resource>
+  </entry>
+  <entry>
+    <fullUrl value="http://hl7.org/fhir/SearchParameter/Condition-severity"/>
+    <resource>
+      <SearchParameter>
+        <id value="Condition-severity"/>
+        <url value="http://hl7.org/fhir/SearchParameter/Condition-severity"/>
+        <name value="severity"/>
+        <status value="draft"/>
+        <experimental value="false"/>
+        <date value="2017-03-21T06:09:53+11:00"/>
+        <publisher value="Health Level Seven International (Patient Care)"/>
+        <contact>
+          <telecom>
+            <system value="url"/>
+            <value value="http://hl7.org/fhir"/>
+          </telecom>
+        </contact>
+        <contact>
+          <telecom>
+            <system value="url"/>
+            <value value="http://www.hl7.org/Special/committees/patientcare/index.cfm"/>
+          </telecom>
+        </contact>
+        <code value="severity"/>
+        <base value="Condition"/>
+        <type value="token"/>
+        <description value="The severity of the condition"/>
+        <expression value="Condition.severity"/>
+        <xpath value="f:Condition/f:severity"/>
+        <xpathUsage value="normal"/>
+      </SearchParameter>
+    </resource>
+  </entry>
+  <entry>
+    <fullUrl value="http://hl7.org/fhir/SearchParameter/Condition-stage"/>
+    <resource>
+      <SearchParameter>
+        <id value="Condition-stage"/>
+        <url value="http://hl7.org/fhir/SearchParameter/Condition-stage"/>
+        <name value="stage"/>
+        <status value="draft"/>
+        <experimental value="false"/>
+        <date value="2017-03-21T06:09:53+11:00"/>
+        <publisher value="Health Level Seven International (Patient Care)"/>
+        <contact>
+          <telecom>
+            <system value="url"/>
+            <value value="http://hl7.org/fhir"/>
+          </telecom>
+        </contact>
+        <contact>
+          <telecom>
+            <system value="url"/>
+            <value value="http://www.hl7.org/Special/committees/patientcare/index.cfm"/>
+          </telecom>
+        </contact>
+        <code value="stage"/>
+        <base value="Condition"/>
+        <type value="token"/>
+        <description value="Simple summary (disease specific)"/>
+        <expression value="Condition.stage.summary"/>
+        <xpath value="f:Condition/f:stage/f:summary"/>
+        <xpathUsage value="normal"/>
+      </SearchParameter>
+    </resource>
+  </entry>
+  <entry>
+    <fullUrl value="http://hl7.org/fhir/SearchParameter/Condition-subject"/>
+    <resource>
+      <SearchParameter>
+        <id value="Condition-subject"/>
+        <url value="http://hl7.org/fhir/SearchParameter/Condition-subject"/>
+        <name value="subject"/>
+        <status value="draft"/>
+        <experimental value="false"/>
+        <date value="2017-03-21T06:09:53+11:00"/>
+        <publisher value="Health Level Seven International (Patient Care)"/>
+        <contact>
+          <telecom>
+            <system value="url"/>
+            <value value="http://hl7.org/fhir"/>
+          </telecom>
+        </contact>
+        <contact>
+          <telecom>
+            <system value="url"/>
+            <value value="http://www.hl7.org/Special/committees/patientcare/index.cfm"/>
+          </telecom>
+        </contact>
+        <code value="subject"/>
+        <base value="Condition"/>
+        <type value="reference"/>
+        <description value="Who has the condition?"/>
+        <expression value="Condition.subject"/>
+        <xpath value="f:Condition/f:subject"/>
+        <xpathUsage value="normal"/>
+        <target value="Group"/>
+        <target value="Patient"/>
+      </SearchParameter>
+    </resource>
+  </entry>
+  <entry>
+    <fullUrl value="http://hl7.org/fhir/SearchParameter/Condition-verification-status"/>
+    <resource>
+      <SearchParameter>
+        <id value="Condition-verification-status"/>
+        <url value="http://hl7.org/fhir/SearchParameter/Condition-verification-status"/>
+        <name value="verification-status"/>
+        <status value="draft"/>
+        <experimental value="false"/>
+        <date value="2017-03-21T06:09:53+11:00"/>
+        <publisher value="Health Level Seven International (Patient Care)"/>
+        <contact>
+          <telecom>
+            <system value="url"/>
+            <value value="http://hl7.org/fhir"/>
+          </telecom>
+        </contact>
+        <contact>
+          <telecom>
+            <system value="url"/>
+            <value value="http://www.hl7.org/Special/committees/patientcare/index.cfm"/>
+          </telecom>
+        </contact>
+        <code value="verification-status"/>
+        <base value="Condition"/>
+        <type value="token"/>
+        <description value="provisional | differential | confirmed | refuted | entered-in-error | unknown"/>
+        <expression value="Condition.verificationStatus"/>
+        <xpath value="f:Condition/f:verificationStatus"/>
+        <xpathUsage value="normal"/>
+      </SearchParameter>
+    </resource>
+  </entry>
+</Bundle>
+}
+
+Storage Default
+{
+<Type>%Storage.Persistent</Type>
+}
+
+}

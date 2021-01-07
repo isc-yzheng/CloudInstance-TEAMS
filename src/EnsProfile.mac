@@ -1,0 +1,142 @@
+ROUTINE EnsProfile
+	;
+	; Copyright (c) 2020 by InterSystems Corporation.
+	; Cambridge, Massachusetts, U.S.A.  All rights reserved.
+	; Confidential property of InterSystems Corporation.
+#include %occInclude
+	;
+test ;
+	s methodlist(1)="Demo.Performance.Service:ProcessInput"
+	s methodlist(2)="Demo.Performance.Service:OnProcessInput"
+	s methodlist(3)="Demo.Performance.Service:SendRequestAsync"
+	s methodlist(4)="Demo.Performance.Process:queueRequestAsync"
+	s methodlist(5)="Ens.Queue:EnQueue"
+	s methodlist(6)="Ens.Queue:enQueueByName"
+	d ExecuteAndProfile("do ##class(Demo.Performance.Production).Test(1000)",.methodlist)
+	q
+	;
+ 
+ExecuteAndProfile(execute,methodlist) public {
+	;
+	d stopMONLBL()
+	;
+	s methodindex="" f {
+		s methodindex=$o(methodlist(methodindex)) q:methodindex=""
+		d findMethodRtnLabel($p(methodlist(methodindex),":",1),$p(methodlist(methodindex),":",2),.routinelist)
+	}
+	d startMONLBL(.routinelist)
+	;
+	w !,execute
+	x execute
+	;
+	d reportMONLBL("c:\_MONLBL.txt")
+	d parseOutput("c:\_MONLBL.txt",.routinelist,.result)
+	;
+	d stopMONLBL()
+	;
+	w #
+	;
+	w "==== Profile Report ====",!!
+	w "code executed: ",execute,!
+	;
+	s methodindex="" f {
+		s methodindex=$o(methodlist(methodindex)) q:methodindex=""
+		i $data(result(methodlist(methodindex)))=0 w !,"method ",methodlist(methodindex),!,"  (no data)",! continue
+		w !,"method ",methodlist(methodindex)
+		w !,"  total number of invocations   = ",result(methodlist(methodindex),"calls")
+		w !,"  total time (including calls)  = ",result(methodlist(methodindex),"total")
+		w !,"  total time (this method only) = ",result(methodlist(methodindex),"time")
+		w !
+	}	
+	q
+}
+ 
+findMethodRtnLabel(class,method,routinelist) public {
+	s rtnlabel=$get($$$comMemberKeyRaw(class,$$$cCLASSmethod,method,$$$cMETHrtnlabel))
+	d gettagrtn^%occDescriptor(class,method,.rtnlabel)
+	s routinelist($p(rtnlabel,"^",2),$p(rtnlabel,"^",1))=class_":"_method
+	q
+}
+ 
+#define getTag(%line)	$p($e(%line,39,9999)," ",1)
+#define getCalls(%line)	+$tr($e(%line,6,15)," ")
+#define getTime(%line)	+$tr($e(%line,16,26)," ")
+#define getTotal(%line)	+$tr($e(%line,27,37)," ")
+parseOutput(filename,routinelist,result) public {
+	s index=$increment(^IRIS.Temp)
+	k ^IRIS.Temp(index)
+	d readFile(filename,index)
+	;
+	s rtn="" f {
+		s rtn=$o(routinelist(rtn)) q:rtn=""
+		s tag="" f {
+			s tag=$o(routinelist(rtn,tag)) q:tag=""
+			;
+			s start=0
+			f i=1:1:^IRIS.Temp(index,rtn) {
+				s line=^IRIS.Temp(index,rtn,i)
+				s thistag=$$$getTag(line)
+				s thistag=$p(thistag,"(",1)
+				i thistag=tag s start=1,result(routinelist(rtn,tag),"calls")=$$$getCalls(line) continue
+				i start,thistag'="","%z"[$e(thistag,1) s start=0 quit
+				i start=0 continue
+				s result(routinelist(rtn,tag),"total")=$g(result(routinelist(rtn,tag),"total"))+$$$getTotal(line)
+				s result(routinelist(rtn,tag),"time")=$g(result(routinelist(rtn,tag),"time"))+$$$getTime(line)
+			}
+		}
+	}
+	;
+	k ^IRIS.Temp(index)
+	q
+}
+ 
+readFile(filename,index) {
+	o filename:"r":0 e  q
+	u filename
+	s $zt="eof"
+	s rtnname=""
+	f {
+		r line
+		i $e(line,1,7)="Routine" s rtnname=$p($p(line," ",2),"^",2) s ^IRIS.Temp(index,rtnname)="" continue
+		i line="" continue
+		i $e(line,1,4)="Line" continue
+		i rtnname="" continue
+		s ^IRIS.Temp(index,rtnname,$increment(^IRIS.Temp(index,rtnname)))=line
+	}
+eof	s $zt=""
+	c filename
+	q
+	}
+stopMONLBL() public {
+	n %input
+	s %input(1)=2
+	s %input(2)=""
+	d ^EnsMONLBL
+	q
+}
+ 
+startMONLBL(routinelist) public {
+	n %input
+	s %input=0
+	s %input($increment(%input))=1
+	s rtn="" f  s rtn=$o(routinelist(rtn)) q:rtn=""  s %input($increment(%input))=rtn
+	s %input($increment(%input))=""
+	s %input($increment(%input))="1"
+	s %input($increment(%input))="1"
+	s %input($increment(%input))=""
+	s %input($increment(%input))=""
+	d ^EnsMONLBL
+	q
+}
+reportMONLBL(output) public {
+	n %input
+	s %input(1)=6
+	s %input(2)=""
+	s %input(3)=output
+	s %input(4)=""
+	s %input(5)=""
+	d ^EnsMONLBL
+	q
+}
+ 
+ 

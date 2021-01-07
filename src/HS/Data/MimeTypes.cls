@@ -1,0 +1,749 @@
+Class HS.Data.MimeTypes Extends (%Persistent, HS.Sync.BaseClass, %XML.Adaptor) [ ClassType = persistent, Inheritance = right ]
+{
+
+Parameter XMLNAME = "MimeTypes";
+
+/// If XMLIGNOREINVALIDTAG is set = 1, then unexpected elements will be ignored.
+/// We use this to allow our web services to be extensible and to work across version boundaries.
+/// With this set to one, we can, for instance, update the hub/registry to a new version, where some of the
+/// xml messages have new properties, and have that communicate with a gateway running a previous version,
+/// where the properties aren't there.
+Parameter XMLIGNOREINVALIDTAG As BOOLEAN = 1;
+
+/// If XMLIGNORENULL is set = "inputonly", then both missing tags in the XML and empty
+/// strings are input as "".  Output of "" and $c(0) are for XMLIGNORENULL = 0:
+/// $c(0) is output as an empty tag (i.e. &lt;tag&gt;&lt;/tag&gt;) and "" is output as no tag.<br><br>
+Parameter XMLIGNORENULL As STRING [ Constraint = ",0,1,inputonly,runtime", Flags = ENUM ] = "inputonly";
+
+/// Extension without the leading period (i.e. "xml" not ".xml")
+Property Extension As %String(MAXLEN = 20);
+
+/// Mime type in lower case
+Property MimeType As %String(MAXLEN = 255);
+
+/// Use preferred to deal with multiple extensions or mime types
+Property Preferred As %Boolean;
+
+ClassMethod LoadDefaultValues(pFileName = "") As %Status
+{
+	Set tSC=$$$OK
+	//first kill extent
+   	do ..%KillExtent()
+   	
+   	if (pFileName="")
+   	{
+   		// Get a stream of XML from the XData block contained in this class if a config file is not provided
+   		Set xdataID="HS.Data.MimeTypes||InitialConfig"
+   		Set compiledXdata=##class(%Dictionary.CompiledXData).%OpenId(xdataID)
+   		Set tStream=compiledXdata.Data
+   	} elseif ##class(%File).Exists(pFileName) {
+	 	set tStream = ##class(%Stream.FileCharacter).%New()
+	 	set tStream.Filename=pFileName  	
+   	} else {
+	 	w !,"Error: Invalid filename specified"  	
+   	}
+   	
+   	set tReader = ##class(%XML.Reader).%New()
+   	set tSC = tReader.OpenStream(tStream)
+   	Quit:$$$ISERR(tSC) tSC
+   	
+   	do tReader.Correlate("MimeTypes","HS.Data.MimeTypes")
+   	while (tReader.Next(.tObject,.tSC)) {
+		Write !,tObject.Extension,?5,tObject.MimeType,":",tObject.%Save()
+		
+   	}
+   	Quit tSC
+}
+
+ClassMethod ExtensionForMimeType(pMimeType As %String) As %String
+{
+	&sql(select Extension into :tExtension from HS_Data.MimeTypes where MimeType=:pMimeType order by preferred desc)
+	Quit $g(tExtension,pMimeType)
+}
+
+ClassMethod MimeTypeForExtension(pExtension As %String) As %String
+{
+	&sql(select MimeType into :tMimeType from HS_Data.MimeTypes where Extension=:pExtension order by preferred desc)
+	Quit $g(tMimeType,pExtension)
+}
+
+/// In order to get the desired config, each extension or mime type which has multiple entries in the table must have one and only
+/// one row where preferred = 1
+XData InitialConfig
+{
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<Import xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+	<MimeTypes>
+		<Extension>a</Extension>
+		<MimeType>application/octet-stream</MimeType>
+		<Preferred>0</Preferred>
+	</MimeTypes>
+	<MimeTypes>
+		<Extension>ai</Extension>
+		<MimeType>application/postscript</MimeType>
+		<Preferred>0</Preferred>
+	</MimeTypes>
+	<MimeTypes>
+		<Extension>aif</Extension>
+		<MimeType>audio/aiff</MimeType>
+		<Preferred>1</Preferred>
+	</MimeTypes>
+	<MimeTypes>
+		<Extension>aif</Extension>
+		<MimeType>audio/x-aiff</MimeType>
+		<Preferred>0</Preferred>
+	</MimeTypes>
+	<MimeTypes>
+		<Extension>arc</Extension>
+		<MimeType>application/octet-stream</MimeType>
+		<Preferred>0</Preferred>
+	</MimeTypes>
+	<MimeTypes>
+		<Extension>arj</Extension>
+		<MimeType>application/arj</MimeType>
+		<Preferred>1</Preferred>
+	</MimeTypes>
+	<MimeTypes>
+		<Extension>arj</Extension>
+		<MimeType>application/octet-stream</MimeType>
+		<Preferred>0</Preferred>
+	</MimeTypes>
+	<MimeTypes>
+		<Extension>asf</Extension>
+		<MimeType>video/x-ms-asf</MimeType>
+		<Preferred>0</Preferred>
+	</MimeTypes>
+	<MimeTypes>
+		<Extension>asp</Extension>
+		<MimeType>text/asp</MimeType>
+		<Preferred>1</Preferred>
+	</MimeTypes>
+	<MimeTypes>
+		<Extension>asx</Extension>
+		<MimeType>application/x-mplayer2</MimeType>
+		<Preferred>0</Preferred>
+	</MimeTypes>
+	<MimeTypes>
+		<Extension>asx</Extension>
+		<MimeType>video/x-ms-asf</MimeType>
+		<Preferred>1</Preferred>
+	</MimeTypes>
+	<MimeTypes>
+		<Extension>asx</Extension>
+		<MimeType>video/x-ms-asf-plugin</MimeType>
+		<Preferred>0</Preferred>
+	</MimeTypes>
+	<MimeTypes>
+		<Extension>au</Extension>
+		<MimeType>audio/basic</MimeType>
+		<Preferred>1</Preferred>
+	</MimeTypes>
+	<MimeTypes>
+		<Extension>au</Extension>
+		<MimeType>audio/x-au</MimeType>
+		<Preferred>0</Preferred>
+	</MimeTypes>
+	<MimeTypes>
+		<Extension>avi</Extension>
+		<MimeType>video/avi</MimeType>
+		<Preferred>1</Preferred>
+	</MimeTypes>
+	<MimeTypes>
+		<Extension>avi</Extension>
+		<MimeType>video/msvideo</MimeType>
+		<Preferred>0</Preferred>
+	</MimeTypes>
+	<MimeTypes>
+		<Extension>avi</Extension>
+		<MimeType>video/x-msvideo</MimeType>
+		<Preferred>0</Preferred>
+	</MimeTypes>
+	<MimeTypes>
+		<Extension>avs</Extension>
+		<MimeType>video/avs-video</MimeType>
+		<Preferred>1</Preferred>
+	</MimeTypes>
+	<MimeTypes>
+		<Extension>bin</Extension>
+		<MimeType>application/octet-stream</MimeType>
+		<Preferred>0</Preferred>
+	</MimeTypes>
+	<MimeTypes>
+		<Extension>bin</Extension>
+		<MimeType>application/x-binary</MimeType>
+		<Preferred>1</Preferred>
+	</MimeTypes>
+	<MimeTypes>
+		<Extension>bm</Extension>
+		<MimeType>image/bmp</MimeType>
+		<Preferred>0</Preferred>
+	</MimeTypes>
+	<MimeTypes>
+		<Extension>bmp</Extension>
+		<MimeType>image/bmp</MimeType>
+		<Preferred>1</Preferred>
+	</MimeTypes>
+	<MimeTypes>
+		<Extension>boz</Extension>
+		<MimeType>application/x-bzip2</MimeType>
+		<Preferred>0</Preferred>
+	</MimeTypes>
+	<MimeTypes>
+		<Extension>bz</Extension>
+		<MimeType>application/x-bzip</MimeType>
+		<Preferred>1</Preferred>
+	</MimeTypes>
+	<MimeTypes>
+		<Extension>bz2</Extension>
+		<MimeType>application/x-bzip2</MimeType>
+		<Preferred>1</Preferred>
+	</MimeTypes>
+	<MimeTypes>
+		<Extension>com</Extension>
+		<MimeType>application/octet-stream</MimeType>
+		<Preferred>0</Preferred>
+	</MimeTypes>
+	<MimeTypes>
+		<Extension>cpio</Extension>
+		<MimeType>application/x-cpio</MimeType>
+		<Preferred>1</Preferred>
+	</MimeTypes>
+	<MimeTypes>
+		<Extension>css</Extension>
+		<MimeType>text/css</MimeType>
+		<Preferred>1</Preferred>
+	</MimeTypes>
+	<MimeTypes>
+		<Extension>dl</Extension>
+		<MimeType>video/dl</MimeType>
+		<Preferred>1</Preferred>
+	</MimeTypes>
+	<MimeTypes>
+		<Extension>doc</Extension>
+		<MimeType>application/msword</MimeType>
+		<Preferred>1</Preferred>
+	</MimeTypes>
+	<MimeTypes>
+		<Extension>dot</Extension>
+		<MimeType>application/msword</MimeType>
+		<Preferred>0</Preferred>
+	</MimeTypes>
+	<MimeTypes>
+		<Extension>dump</Extension>
+		<MimeType>application/octet-stream</MimeType>
+		<Preferred>0</Preferred>
+	</MimeTypes>
+	<MimeTypes>
+		<Extension>dwg</Extension>
+		<MimeType>application/acad</MimeType>
+		<Preferred>0</Preferred>
+	</MimeTypes>
+	<MimeTypes>
+		<Extension>eps</Extension>
+		<MimeType>application/postscript</MimeType>
+		<Preferred>1</Preferred>
+	</MimeTypes>
+	<MimeTypes>
+		<Extension>exe</Extension>
+		<MimeType>application/octet-stream</MimeType>
+		<Preferred>1</Preferred>
+	</MimeTypes>
+	<MimeTypes>
+		<Extension>fli</Extension>
+		<MimeType>video/fli</MimeType>
+		<Preferred>0</Preferred>
+	</MimeTypes>
+	<MimeTypes>
+		<Extension>gl</Extension>
+		<MimeType>video/gl</MimeType>
+		<Preferred>1</Preferred>
+	</MimeTypes>
+	<MimeTypes>
+		<Extension>gsp</Extension>
+		<MimeType>application/x-gsp</MimeType>
+		<Preferred>0</Preferred>
+	</MimeTypes>
+	<MimeTypes>
+		<Extension>gss</Extension>
+		<MimeType>application/x-gss</MimeType>
+		<Preferred>0</Preferred>
+	</MimeTypes>
+	<MimeTypes>
+		<Extension>gtar</Extension>
+		<MimeType>application/x-gtar</MimeType>
+		<Preferred>1</Preferred>
+	</MimeTypes>
+	<MimeTypes>
+		<Extension>gz</Extension>
+		<MimeType>application/x-gzip</MimeType>
+		<Preferred>0</Preferred>
+	</MimeTypes>
+	<MimeTypes>
+		<Extension>gzip</Extension>
+		<MimeType>application/x-gzip</MimeType>
+		<Preferred>0</Preferred>
+	</MimeTypes>
+	<MimeTypes>
+		<Extension>gzip</Extension>
+		<MimeType>multipart/x-gzip</MimeType>
+		<Preferred>1</Preferred>
+	</MimeTypes>
+	<MimeTypes>
+		<Extension>htm</Extension>
+		<MimeType>text/html</MimeType>
+		<Preferred>1</Preferred>
+	</MimeTypes>
+	<MimeTypes>
+		<Extension>html</Extension>
+		<MimeType>text/html</MimeType>
+		<Preferred>0</Preferred>
+	</MimeTypes>
+	<MimeTypes>
+		<Extension>htmls</Extension>
+		<MimeType>text/html</MimeType>
+		<Preferred>0</Preferred>
+	</MimeTypes>
+	<MimeTypes>
+		<Extension>htx</Extension>
+		<MimeType>text/html</MimeType>
+		<Preferred>0</Preferred>
+	</MimeTypes>
+	<MimeTypes>
+		<Extension>isu</Extension>
+		<MimeType>video/x-isvideo</MimeType>
+		<Preferred>0</Preferred>
+	</MimeTypes>
+	<MimeTypes>
+		<Extension>it</Extension>
+		<MimeType>audio/it</MimeType>
+		<Preferred>1</Preferred>
+	</MimeTypes>
+	<MimeTypes>
+		<Extension>jpeg</Extension>
+		<MimeType>image/jpeg</MimeType>
+		<Preferred>0</Preferred>
+	</MimeTypes>
+	<MimeTypes>
+		<Extension>jpg</Extension>
+		<MimeType>image/jpeg</MimeType>
+		<Preferred>1</Preferred>
+	</MimeTypes>
+	<MimeTypes>
+		<Extension>jpg</Extension>
+		<MimeType>image/pjpeg</MimeType>
+		<Preferred>0</Preferred>
+	</MimeTypes>
+	<MimeTypes>
+		<Extension>lha</Extension>
+		<MimeType>application/octet-stream</MimeType>
+		<Preferred>0</Preferred>
+	</MimeTypes>
+	<MimeTypes>
+		<Extension>lhx</Extension>
+		<MimeType>application/octet-stream</MimeType>
+		<Preferred>0</Preferred>
+	</MimeTypes>
+	<MimeTypes>
+		<Extension>lzh</Extension>
+		<MimeType>application/octet-stream</MimeType>
+		<Preferred>0</Preferred>
+	</MimeTypes>
+	<MimeTypes>
+		<Extension>lzx</Extension>
+		<MimeType>application/octet-stream</MimeType>
+		<Preferred>0</Preferred>
+	</MimeTypes>
+	<MimeTypes>
+		<Extension>m1v</Extension>
+		<MimeType>video/mpeg</MimeType>
+		<Preferred>0</Preferred>
+	</MimeTypes>
+	<MimeTypes>
+		<Extension>m2v</Extension>
+		<MimeType>video/mpeg</MimeType>
+		<Preferred>0</Preferred>
+	</MimeTypes>
+	<MimeTypes>
+		<Extension>mcp</Extension>
+		<MimeType>application/netmc</MimeType>
+		<Preferred>0</Preferred>
+	</MimeTypes>
+	<MimeTypes>
+		<Extension>mif</Extension>
+		<MimeType>application/x-frame</MimeType>
+		<Preferred>0</Preferred>
+	</MimeTypes>
+	<MimeTypes>
+		<Extension>mjpg</Extension>
+		<MimeType>video/x-motion-jpeg</MimeType>
+		<Preferred>0</Preferred>
+	</MimeTypes>
+	<MimeTypes>
+		<Extension>mov</Extension>
+		<MimeType>video/quicktime</MimeType>
+		<Preferred>1</Preferred>
+	</MimeTypes>
+	<MimeTypes>
+		<Extension>mp3</Extension>
+		<MimeType>audio/mpeg3</MimeType>
+		<Preferred>1</Preferred>
+	</MimeTypes>
+	<MimeTypes>
+		<Extension>mp3</Extension>
+		<MimeType>audio/x-mpeg-3</MimeType>
+		<Preferred>0</Preferred>
+	</MimeTypes>
+	<MimeTypes>
+		<Extension>mp3</Extension>
+		<MimeType>video/mpeg</MimeType>
+		<Preferred>0</Preferred>
+	</MimeTypes>
+	<MimeTypes>
+		<Extension>mpa</Extension>
+		<MimeType>audio/mpeg</MimeType>
+		<Preferred>1</Preferred>
+	</MimeTypes>
+	<MimeTypes>
+		<Extension>mpa</Extension>
+		<MimeType>video/mpeg</MimeType>
+		<Preferred>0</Preferred>
+	</MimeTypes>
+	<MimeTypes>
+		<Extension>mpe</Extension>
+		<MimeType>video/mpeg</MimeType>
+		<Preferred>0</Preferred>
+	</MimeTypes>
+	<MimeTypes>
+		<Extension>mpeg</Extension>
+		<MimeType>video/mpeg</MimeType>
+		<Preferred>0</Preferred>
+	</MimeTypes>
+	<MimeTypes>
+		<Extension>mpg</Extension>
+		<MimeType>audio/mpeg</MimeType>
+		<Preferred>0</Preferred>
+	</MimeTypes>
+	<MimeTypes>
+		<Extension>mpg</Extension>
+		<MimeType>video/mpeg</MimeType>
+		<Preferred>1</Preferred>
+	</MimeTypes>
+	<MimeTypes>
+		<Extension>mpga</Extension>
+		<MimeType>audio/mpeg</MimeType>
+		<Preferred>0</Preferred>
+	</MimeTypes>
+	<MimeTypes>
+		<Extension>nsc</Extension>
+		<MimeType>application/x-conference</MimeType>
+		<Preferred>0</Preferred>
+	</MimeTypes>
+	<MimeTypes>
+		<Extension>o</Extension>
+		<MimeType>application/octet-stream</MimeType>
+		<Preferred>0</Preferred>
+	</MimeTypes>
+	<MimeTypes>
+		<Extension>pdf</Extension>
+		<MimeType>application/pdf</MimeType>
+		<Preferred>1</Preferred>
+	</MimeTypes>
+	<MimeTypes>
+		<Extension>pic</Extension>
+		<MimeType>image/pict</MimeType>
+		<Preferred>1</Preferred>
+	</MimeTypes>
+	<MimeTypes>
+		<Extension>pict</Extension>
+		<MimeType>image/pict</MimeType>
+		<Preferred>0</Preferred>
+	</MimeTypes>
+	<MimeTypes>
+		<Extension>pot</Extension>
+		<MimeType>application/mspowerpoint</MimeType>
+		<Preferred>0</Preferred>
+	</MimeTypes>
+	<MimeTypes>
+		<Extension>pps</Extension>
+		<MimeType>application/mspowerpoint</MimeType>
+		<Preferred>1</Preferred>
+	</MimeTypes>
+	<MimeTypes>
+		<Extension>ppt</Extension>
+		<MimeType>application/mspowerpoint</MimeType>
+		<Preferred>0</Preferred>
+	</MimeTypes>
+	<MimeTypes>
+		<Extension>ppt</Extension>
+		<MimeType>application/powerpoint</MimeType>
+		<Preferred>1</Preferred>
+	</MimeTypes>
+	<MimeTypes>
+		<Extension>ppt</Extension>
+		<MimeType>application/x-mspowerpoint</MimeType>
+		<Preferred>0</Preferred>
+	</MimeTypes>
+	<MimeTypes>
+		<Extension>ppz</Extension>
+		<MimeType>application/mspowerpoint</MimeType>
+		<Preferred>0</Preferred>
+	</MimeTypes>
+	<MimeTypes>
+		<Extension>pre</Extension>
+		<MimeType>application/x-freelance</MimeType>
+		<Preferred>0</Preferred>
+	</MimeTypes>
+	<MimeTypes>
+		<Extension>prt</Extension>
+		<MimeType>application/pro_eng</MimeType>
+		<Preferred>0</Preferred>
+	</MimeTypes>
+	<MimeTypes>
+		<Extension>ps</Extension>
+		<MimeType>application/postscript</MimeType>
+		<Preferred>0</Preferred>
+	</MimeTypes>
+	<MimeTypes>
+		<Extension>psd</Extension>
+		<MimeType>application/octet-stream</MimeType>
+		<Preferred>0</Preferred>
+	</MimeTypes>
+	<MimeTypes>
+		<Extension>pyc</Extension>
+		<MimeType>applicaiton/x-bytecode.python</MimeType>
+		<Preferred>0</Preferred>
+	</MimeTypes>
+	<MimeTypes>
+		<Extension>qif</Extension>
+		<MimeType>image/x-quicktime</MimeType>
+		<Preferred>1</Preferred>
+	</MimeTypes>
+	<MimeTypes>
+		<Extension>qt</Extension>
+		<MimeType>video/quicktime</MimeType>
+		<Preferred>0</Preferred>
+	</MimeTypes>
+	<MimeTypes>
+		<Extension>qtc</Extension>
+		<MimeType>video/x-qtc</MimeType>
+		<Preferred>0</Preferred>
+	</MimeTypes>
+	<MimeTypes>
+		<Extension>qti</Extension>
+		<MimeType>image/x-quicktime</MimeType>
+		<Preferred>0</Preferred>
+	</MimeTypes>
+	<MimeTypes>
+		<Extension>qtif</Extension>
+		<MimeType>image/x-quicktime</MimeType>
+		<Preferred>0</Preferred>
+	</MimeTypes>
+	<MimeTypes>
+		<Extension>rng</Extension>
+		<MimeType>application/ringing-tones</MimeType>
+		<Preferred>0</Preferred>
+	</MimeTypes>
+	<MimeTypes>
+		<Extension>rtf</Extension>
+		<MimeType>application/rtf</MimeType>
+		<Preferred>0</Preferred>
+	</MimeTypes>
+	<MimeTypes>
+		<Extension>rtf</Extension>
+		<MimeType>application/x-rtf</MimeType>
+		<Preferred>0</Preferred>
+	</MimeTypes>
+	<MimeTypes>
+		<Extension>rtf</Extension>
+		<MimeType>text/richtext</MimeType>
+		<Preferred>1</Preferred>
+	</MimeTypes>
+	<MimeTypes>
+		<Extension>saveme</Extension>
+		<MimeType>application/octet-stream</MimeType>
+		<Preferred>0</Preferred>
+	</MimeTypes>
+	<MimeTypes>
+		<Extension>scm</Extension>
+		<MimeType>video/x-scm</MimeType>
+		<Preferred>0</Preferred>
+	</MimeTypes>
+	<MimeTypes>
+		<Extension>shtml</Extension>
+		<MimeType>text/html</MimeType>
+		<Preferred>0</Preferred>
+	</MimeTypes>
+	<MimeTypes>
+		<Extension>snd</Extension>
+		<MimeType>audio/basic</MimeType>
+		<Preferred>0</Preferred>
+	</MimeTypes>
+	<MimeTypes>
+		<Extension>snd</Extension>
+		<MimeType>audio/x-adpcm</MimeType>
+		<Preferred>1</Preferred>
+	</MimeTypes>
+	<MimeTypes>
+		<Extension>tar</Extension>
+		<MimeType>application/x-tar</MimeType>
+		<Preferred>0</Preferred>
+	</MimeTypes>
+	<MimeTypes>
+		<Extension>text</Extension>
+		<MimeType>text/plain</MimeType>
+		<Preferred>0</Preferred>
+	</MimeTypes>
+	<MimeTypes>
+		<Extension>tgz</Extension>
+		<MimeType>application/gnutar</MimeType>
+		<Preferred>1</Preferred>
+	</MimeTypes>
+	<MimeTypes>
+		<Extension>tif</Extension>
+		<MimeType>image/tiff</MimeType>
+		<Preferred>1</Preferred>
+	</MimeTypes>
+	<MimeTypes>
+		<Extension>tiff</Extension>
+		<MimeType>image/tiff</MimeType>
+		<Preferred>0</Preferred>
+	</MimeTypes>
+	<MimeTypes>
+		<Extension>txt</Extension>
+		<MimeType>text/plain</MimeType>
+		<Preferred>1</Preferred>
+	</MimeTypes>
+	<MimeTypes>
+		<Extension>uu</Extension>
+		<MimeType>application/octet-stream</MimeType>
+		<Preferred>0</Preferred>
+	</MimeTypes>
+	<MimeTypes>
+		<Extension>w60</Extension>
+		<MimeType>application/wordperfect6.0</MimeType>
+		<Preferred>1</Preferred>
+	</MimeTypes>
+	<MimeTypes>
+		<Extension>w61</Extension>
+		<MimeType>application/wordperfect6.1</MimeType>
+		<Preferred>1</Preferred>
+	</MimeTypes>
+	<MimeTypes>
+		<Extension>w6w</Extension>
+		<MimeType>application/msword</MimeType>
+		<Preferred>0</Preferred>
+	</MimeTypes>
+	<MimeTypes>
+		<Extension>wav</Extension>
+		<MimeType>audio/wav</MimeType>
+		<Preferred>1</Preferred>
+	</MimeTypes>
+	<MimeTypes>
+		<Extension>wav</Extension>
+		<MimeType>audio/x-wav</MimeType>
+		<Preferred>0</Preferred>
+	</MimeTypes>
+	<MimeTypes>
+		<Extension>wiz</Extension>
+		<MimeType>application/msword</MimeType>
+		<Preferred>0</Preferred>
+	</MimeTypes>
+	<MimeTypes>
+		<Extension>word</Extension>
+		<MimeType>application/msword</MimeType>
+		<Preferred>0</Preferred>
+	</MimeTypes>
+	<MimeTypes>
+		<Extension>wp</Extension>
+		<MimeType>application/wordperfect</MimeType>
+		<Preferred>0</Preferred>
+	</MimeTypes>
+	<MimeTypes>
+		<Extension>wp6</Extension>
+		<MimeType>application/wordperfect6.0</MimeType>
+		<Preferred>0</Preferred>
+	</MimeTypes>
+	<MimeTypes>
+		<Extension>wpd</Extension>
+		<MimeType>application/wordperfect</MimeType>
+		<Preferred>1</Preferred>
+	</MimeTypes>
+	<MimeTypes>
+		<Extension>wri</Extension>
+		<MimeType>application/mswrite</MimeType>
+		<Preferred>0</Preferred>
+	</MimeTypes>
+	<MimeTypes>
+		<Extension>xls</Extension>
+		<MimeType>application/excel</MimeType>
+		<Preferred>1</Preferred>
+	</MimeTypes>
+	<MimeTypes>
+		<Extension>xlsx</Extension>
+		<MimeType>application/excel</MimeType>
+		<Preferred>0</Preferred>
+	</MimeTypes>
+	<MimeTypes>
+		<Extension>xlsx</Extension>
+		<MimeType>application/x-excel</MimeType>
+		<Preferred>1</Preferred>
+	</MimeTypes>
+	<MimeTypes>
+		<Extension>xml</Extension>
+		<MimeType>application/xml</MimeType>
+		<Preferred>0</Preferred>
+	</MimeTypes>
+	<MimeTypes>
+		<Extension>xml</Extension>
+		<MimeType>text/xml</MimeType>
+		<Preferred>1</Preferred>
+	</MimeTypes>
+	<MimeTypes>
+		<Extension>zip</Extension>
+		<MimeType>application/x-compressed</MimeType>
+		<Preferred>0</Preferred>
+	</MimeTypes>
+	<MimeTypes>
+		<Extension>zip</Extension>
+		<MimeType>application/zip</MimeType>
+		<Preferred>1</Preferred>
+	</MimeTypes>
+	<MimeTypes>
+		<Extension>zip</Extension>
+		<MimeType>multipart/x-zip</MimeType>
+		<Preferred>0</Preferred>
+	</MimeTypes>
+	<MimeTypes>
+		<Extension>zoo</Extension>
+		<MimeType>application/octet-stream</MimeType>
+		<Preferred>0</Preferred>
+	</MimeTypes>
+</Import>
+}
+
+Storage Default
+{
+<Data name="MimeTypesDefaultData">
+<Value name="1">
+<Value>%%CLASSNAME</Value>
+</Value>
+<Value name="2">
+<Value>Extension</Value>
+</Value>
+<Value name="3">
+<Value>MimeType</Value>
+</Value>
+<Value name="4">
+<Value>Preferred</Value>
+</Value>
+</Data>
+<DataLocation>^HS.Data.MimeTypesD</DataLocation>
+<DefaultData>MimeTypesDefaultData</DefaultData>
+<ExtentSize>100000</ExtentSize>
+<IdLocation>^HS.Data.MimeTypesD</IdLocation>
+<IndexLocation>^HS.Data.MimeTypesI</IndexLocation>
+<StreamLocation>^HS.Data.MimeTypesS</StreamLocation>
+<Type>%Storage.Persistent</Type>
+}
+
+}

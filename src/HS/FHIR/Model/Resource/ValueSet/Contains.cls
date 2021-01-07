@@ -1,0 +1,108 @@
+/// *** <b>THIS CLASS IS DEPRECATED.</b> Please use HS.FHIR.<b>vDSTU2.</b>Model.Resource.ValueSet.Contains when working with FHIR DSTU2.
+Class HS.FHIR.Model.Resource.ValueSet.Contains Extends HS.FHIR.Model.Base.BackboneElement [ Deprecated, ProcedureBlock ]
+{
+
+///  
+Parameter JSONTYPEFIELD;
+
+///  
+Parameter ELEMENTQUALIFIED = 1;
+
+///  
+Parameter XMLNAME = "ValueSet.Contains";
+
+///  
+Parameter XMLSEQUENCE = 1;
+
+///  
+Parameter XMLTYPE = "ValueSet.Contains";
+
+///  
+Property system As HS.FHIR.Model.Datatype.Uri(XMLNAME = "system");
+
+///  
+Property abstract As HS.FHIR.Model.Datatype.Boolean(XMLNAME = "abstract");
+
+///  
+Property version As HS.FHIR.Model.Datatype.String(XMLNAME = "version");
+
+///  
+Property code As HS.FHIR.Model.Datatype.Code(XMLNAME = "code");
+
+///  
+Property display As HS.FHIR.Model.Datatype.String(XMLNAME = "display");
+
+///  
+Property contains As list Of HS.FHIR.Model.Resource.ValueSet.Contains(XMLNAME = "contains", XMLPROJECTION = "ELEMENT");
+
+///  
+Method SetSystem(pValue As %String = "", pExtension As %RegisteredObject = "", pId As %String = "") As %Status
+{
+	Set tSC = $$$OK
+	Try {
+		Set tObj = ##class(HS.FHIR.Model.Datatype.Uri).%New(pValue, pExtension, pId)
+		If '$IsObject($Get(tObj)) Set tSC = $$$ERROR($$$GeneralError,"%New of FHIR Uri object failed") Quit
+		Set ..system = tObj
+	} Catch ex {
+		Set tSC = ex.AsStatus()
+	}
+	Quit tSC
+}
+
+///  
+Method SetAbstract(pValue As %String = "", pExtension As %RegisteredObject = "", pId As %String = "") As %Status
+{
+	Set tSC = $$$OK
+	Try {
+		Set tObj = ##class(HS.FHIR.Model.Datatype.Boolean).%New(pValue, pExtension, pId)
+		If '$IsObject($Get(tObj)) Set tSC = $$$ERROR($$$GeneralError,"%New of FHIR Boolean object failed") Quit
+		Set ..abstract = tObj
+	} Catch ex {
+		Set tSC = ex.AsStatus()
+	}
+	Quit tSC
+}
+
+///  
+Method SetVersion(pValue As %String = "", pExtension As %RegisteredObject = "", pId As %String = "") As %Status
+{
+	Set tSC = $$$OK
+	Try {
+		Set tObj = ##class(HS.FHIR.Model.Datatype.String).%New(pValue, pExtension, pId)
+		If '$IsObject($Get(tObj)) Set tSC = $$$ERROR($$$GeneralError,"%New of FHIR String object failed") Quit
+		Set ..version = tObj
+	} Catch ex {
+		Set tSC = ex.AsStatus()
+	}
+	Quit tSC
+}
+
+///  
+Method SetCode(pValue As %String = "", pExtension As %RegisteredObject = "", pId As %String = "") As %Status
+{
+	Set tSC = $$$OK
+	Try {
+		Set tObj = ##class(HS.FHIR.Model.Datatype.Code).%New(pValue, pExtension, pId)
+		If '$IsObject($Get(tObj)) Set tSC = $$$ERROR($$$GeneralError,"%New of FHIR Code object failed") Quit
+		Set ..code = tObj
+	} Catch ex {
+		Set tSC = ex.AsStatus()
+	}
+	Quit tSC
+}
+
+///  
+Method SetDisplay(pValue As %String = "", pExtension As %RegisteredObject = "", pId As %String = "") As %Status
+{
+	Set tSC = $$$OK
+	Try {
+		Set tObj = ##class(HS.FHIR.Model.Datatype.String).%New(pValue, pExtension, pId)
+		If '$IsObject($Get(tObj)) Set tSC = $$$ERROR($$$GeneralError,"%New of FHIR String object failed") Quit
+		Set ..display = tObj
+	} Catch ex {
+		Set tSC = ex.AsStatus()
+	}
+	Quit tSC
+}
+
+}

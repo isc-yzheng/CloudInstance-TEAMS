@@ -1,0 +1,138 @@
+ROUTINE EnsJob
+#include %occStatus
+	; Copyright (c) 2020 by InterSystems Corporation.
+	; Cambridge, Massachusetts, U.S.A.  All rights reserved.
+	; Confidential property of InterSystems Corporation.
+#include Ensemble
+	;
+Start(pArgumentIndex) ;
+	#;
+	#; turn on programmer mode, allow embeded BREAK command to work
+	Do ^%PMODE
+	#;
+	#; TODO: check for error here
+	Set tArgument=$$$EnsRuntime("ForegroundJobsArgument",pArgumentIndex)
+	Kill $$$EnsRuntime("ForegroundJobsArgument",pArgumentIndex)
+	#;
+	#; call Ens.Job:Start()
+	Set tSC=##class(Ens.Job).Start($li(tArgument,1),$li(tArgument,2),0,$li(tArgument,3),$li(tArgument,4))
+	#;
+	#; if status is error, quit and leave terminal open
+	If $$$ISERR(tSC) Do DisplayError^%apiOBJ(tSC) If $g($$$EnsDebug("RetainTerminalOnError")) Quit
+	#;
+	#; halt the process if exit successfully
+	Halt
+	#;
+	#;
+	;
+ 
+Start1 Do Start(1) Quit
+Start2 Do Start(2) Quit
+Start3 Do Start(3) Quit
+Start4 Do Start(4) Quit
+Start5 Do Start(5) Quit
+Start6 Do Start(6) Quit
+Start7 Do Start(7) Quit
+Start8 Do Start(8) Quit
+Start9 Do Start(9) Quit
+ 
+Start10 Do Start(10) Quit
+Start11 Do Start(11) Quit
+Start12 Do Start(12) Quit
+Start13 Do Start(13) Quit
+Start14 Do Start(14) Quit
+Start15 Do Start(15) Quit
+Start16 Do Start(16) Quit
+Start17 Do Start(17) Quit
+Start18 Do Start(18) Quit
+Start19 Do Start(19) Quit
+ 
+Start20 Do Start(20) Quit
+Start21 Do Start(21) Quit
+Start22 Do Start(22) Quit
+Start23 Do Start(23) Quit
+Start24 Do Start(24) Quit
+Start25 Do Start(25) Quit
+Start26 Do Start(26) Quit
+Start27 Do Start(27) Quit
+Start28 Do Start(28) Quit
+Start29 Do Start(29) Quit
+ 
+Start30 Do Start(30) Quit
+Start31 Do Start(31) Quit
+Start32 Do Start(32) Quit
+Start33 Do Start(33) Quit
+Start34 Do Start(34) Quit
+Start35 Do Start(35) Quit
+Start36 Do Start(36) Quit
+Start37 Do Start(37) Quit
+Start38 Do Start(38) Quit
+Start39 Do Start(39) Quit
+ 
+Start40 Do Start(40) Quit
+Start41 Do Start(41) Quit
+Start42 Do Start(42) Quit
+Start43 Do Start(43) Quit
+Start44 Do Start(44) Quit
+Start45 Do Start(45) Quit
+Start46 Do Start(46) Quit
+Start47 Do Start(47) Quit
+Start48 Do Start(48) Quit
+Start49 Do Start(49) Quit
+ 
+Start50 Do Start(50) Quit
+Start51 Do Start(51) Quit
+Start52 Do Start(52) Quit
+Start53 Do Start(53) Quit
+Start54 Do Start(54) Quit
+Start55 Do Start(55) Quit
+Start56 Do Start(56) Quit
+Start57 Do Start(57) Quit
+Start58 Do Start(58) Quit
+Start59 Do Start(59) Quit
+ 
+Start60 Do Start(60) Quit
+Start61 Do Start(61) Quit
+Start62 Do Start(62) Quit
+Start63 Do Start(63) Quit
+Start64 Do Start(64) Quit
+Start65 Do Start(65) Quit
+Start66 Do Start(66) Quit
+Start67 Do Start(67) Quit
+Start68 Do Start(68) Quit
+Start69 Do Start(69) Quit
+ 
+Start70 Do Start(70) Quit
+Start71 Do Start(71) Quit
+Start72 Do Start(72) Quit
+Start73 Do Start(73) Quit
+Start74 Do Start(74) Quit
+Start75 Do Start(75) Quit
+Start76 Do Start(76) Quit
+Start77 Do Start(77) Quit
+Start78 Do Start(78) Quit
+Start79 Do Start(79) Quit
+ 
+Start80 Do Start(80) Quit
+Start81 Do Start(81) Quit
+Start82 Do Start(82) Quit
+Start83 Do Start(83) Quit
+Start84 Do Start(84) Quit
+Start85 Do Start(85) Quit
+Start86 Do Start(86) Quit
+Start87 Do Start(87) Quit
+Start88 Do Start(88) Quit
+Start89 Do Start(89) Quit
+ 
+Start90 Do Start(90) Quit
+Start91 Do Start(91) Quit
+Start92 Do Start(92) Quit
+Start93 Do Start(93) Quit
+Start94 Do Start(94) Quit
+Start95 Do Start(95) Quit
+Start96 Do Start(96) Quit
+Start97 Do Start(97) Quit
+Start98 Do Start(98) Quit
+Start99 Do Start(99) Quit
+ 
+ 

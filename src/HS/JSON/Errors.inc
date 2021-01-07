@@ -1,0 +1,9 @@
+ROUTINE HS.JSON.Errors [Type=INC]
+#define HSJSONErrInvalidClassSpecified           "<HSJSONErr>InvalidClassSpecified"
+#define HSJSONErrInvalidFieldSupplied            "<HSJSONErr>InvalidFieldSupplied"
+#define HSJSONErrInvalidJSONArray                "<HSJSONErr>InvalidJSONArray"
+#define HSJSONErrInvalidJSONCharacter            "<HSJSONErr>InvalidJSONCharacter"
+#define HSJSONErrInvalidJSONNumber               "<HSJSONErr>InvalidJSONNumber"
+#define HSJSONErrInvalidJSONPropertyNameRequired "<HSJSONErr>InvalidJSONPropertyNameRequired"
+#define HSJSONErrInvalidJSONValueRequired        "<HSJSONErr>InvalidJSONValueRequired"
+#define HSJSONErrResolveObjectPropertySet        "<HSJSONErr>ResolveObjectPropertySet"

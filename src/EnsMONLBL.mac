@@ -1,0 +1,363 @@
+ROUTINE EnsMONLBL
+%MONLBL ;Line-by-line monitor
+	; Copyright (c) 2020 by InterSystems Corporation.
+	; Cambridge, Massachusetts, U.S.A.  All rights reserved.
+	; Confidential property of InterSystems Corporation.
+ ; 
+ ; MC: assuming input parameters are in %input(1), %input(2), ...
+ s %input=0
+ ; 
+ if $zu(84,8) = 1  d
+ . if $zu(84,1)=0 set started = 2 
+ . else  set started = 1
+ else  set started = 0
+ s MAXMETRIC=52 ; RFD043 ; RFD044
+Menu
+ use 0 write #,!!
+ if started = 0 write "1.) Start Monitor"
+ write !
+ if started = 0 {
+	 w !!
+	 w "  WARNING ! Starting the line-by-line monitor will enable the",!
+	 w "  collection of statistics for *every* line of code executed",!
+	 w "  by the selected routines and processes. This can have a major",!
+	 w "  impact on the performance of a system, and it is recommended",!
+	 w "  that you do this on a 'test' system.",!
+ }
+ if started > 0 write "2.) Stop Monitor" 
+ write !
+ if started = 1 write "3.) Pause Monitor" 
+ write !
+ if started = 2 write "4.) Resume Monitor" 
+ write !
+ if started > 0 write "5.) Clear Counters" 
+ write !
+ if started > 0 write "6.) Report LBL Statistics" 
+ write !!
+ write "Enter the number of your choice: "
+ ;
+ i $data(%input($increment(%input))) s in=%input(%input)
+ e  read in
+ quit:in=""
+ ;
+ if started = 0, in=1 set stat=$$Start() if stat = 1 set started = 1 goto Menu
+ if started > 0, in=2 set stat=$$Stop() if stat = 1 set started = 0 d:stat'=1 merr goto Menu
+ if started = 1, in=3 set stat=$$Pause() if stat = 1 set started = 2 d:stat'=1 merr goto Menu
+ if started = 2, in=4 set stat=$$Resume() if stat = 1 set started = 1  d:stat'=1 merr goto Menu
+ if started > 0, in=5 set stat=$$Clear() d:stat'=1 merr goto Menu
+ if started > 0, in=6 set stat = $$LBLout()
+ goto Menu
+merr write !!,"Error = ",stat
+ret 
+ write !!,"Press RETURN to continue ... " 
+ i $data(%input($increment(%input))) s in=%input(%input)
+ e  read in
+ quit
+ ;
+ ; LBL stats
+ ;
+LBLout()
+ set n = $zu(84,16)
+ for rtnnum=1:1:n write !, rtnnum, ".) ", $zu(84,16,2,rtnnum)
+rtnnuminput
+ write !, "Routine (Enter for all rtns):"
+ i $data(%input($increment(%input))) s rtnnum=%input(%input)
+ e  read rtnnum
+ if (rtnnum < 0) goto rtnnuminput
+ if (rtnnum > ($zu(84,16))) goto rtnnuminput
+ set pidbin = 0
+ if ($zu(84,14,10) > 0) {
+pidbininput
+	 i $data(%input($increment(%input))) s pidbin=%input(%input)
+	 e  read !,"pid bin # (Enter for default bin):", pidbin
+	 if (pidbin > $zu(84,14,10)) goto pidbininput
+ }
+ i $data(%input($increment(%input))) s filename=%input(%input)
+ e  read !,"FileName: ", filename
+ s:filename="" filename=0
+ open filename:"NW":1 if '$t set status=-5 w !!, "Unable to open output file." do ret quit 4
+ use filename
+ ; Write Rtn Data
+ if (rtnnum > 0) {
+	 do writertndata(rtnnum)
+	 write !!
+ }
+ else {
+ 	for rtnnum=1:1:($zu(84,16)) {
+		do writertndata(rtnnum)
+		write !!
+ 	}
+ }
+ goto writertndataend
+writertndata(rtnnum)
+ ; Write Data For a Single Rtn
+ set rtnname = $zu(84,16,2,rtnnum)
+ s sp=11
+ w !!,"Routine ^",rtnname," ..."
+ set lns = $zu(84, 16, 1, rtnnum)
+ if lns=0 w " no data yet." quit
+ ; Write Column Headers
+ write !!,"Line " s col=5
+ for metric=0:1:($zu(84,13)-1) {
+	s column = $zu(84,13,11,metric) + 1 ; RFD044
+	s out=$piece($text(@("Flist+"_column)),";",4)
+	w ?col,$j(out,sp-1)
+	s col=col+sp
+ }
+ for line=0:1:(lns-1) {
+	write !,(line+1)
+	s col=5
+	for metric=0:1:($zu(84,13)-1) {
+		s out=$zu(84,16,3,line,metric)
+		; Convert clock/CPU time to seconds
+		s n=$zu(84,13,11,metric)
+		i (n=50)!(n=51) s out=$select(out=0:"0"_$j("",sp-4),1:$fnumber(out/1000000,"",6)) ; RFD057
+ 		write ?col,$j(out,sp-1)
+ 		s col=col+sp
+	}
+ 	write ?col,$TEXT(@("+" _ (line+1) _ "^" _ rtnname))
+ }
+ quit
+writertndataend
+ ; Do Cleanup
+ use 0
+ close filename
+ do ret
+ quit 4
+ ;
+ ; Startup a Monitor run
+ ;
+Start()
+ set status=1,err="",$ZT="runexit",$ZE=""
+ L +^SYS("MON-HOLD"):3
+ else  set status=-1,err="Somebody else is using Monitor" goto runexit
+ ;s ^SYS("MONITOR","VP")="RUN"
+ if $zu(84,8)=1 set status=-2,err="Monitor is already running" goto runexit
+ do $zu(84,12,0)
+ ; Get routine names to monitor
+ write !!, "Enter routine names to monitor on a line by line basis."
+ write !,"Enter blank line to terminate input"
+rtninput
+ write !, "Routine Name: "
+ i $data(%input($increment(%input))) s rtnname=%input(%input)
+ e  read rtnname
+ if rtnname = "" goto rtninputdone
+ s $zt = "rtnnoexist"
+ x "zl " _ rtnname _ " do $zu(84,12,1)"
+ s $zt = "runexit"
+ goto rtninput
+rtnnoexist
+ w !, $ze
+ s $ze = ""
+ goto rtninput
+rtninputdone
+ ; Get metrics to monitor
+ write !!,"Select which metrics to monitor"
+ write !, "  1.) Monitor Default Metrics"
+ write !, "  2.) Monitor All Metrics"
+ write !, "  3.) Customize Monitor Metrics"
+ write !!,"Enter the number of your choice: <1> "
+ i $data(%input($increment(%input))) s in=%input(%input)
+ e  read in
+ s:in="" in=1
+ if ((in < 1) + (in > 3)) goto rtninputdone
+ if in = 1 do
+ . do $zu(84,13,0)
+ . do $zu(84,13,1,33) ; M commands
+ . do $zu(84,13,1,50) ; clock time
+ . do $zu(84,13,1,51) ; total time	; RFD044
+ if in = 2 do $zu(84, 13, 2)
+ if in = 3 {
+	do $zu(84,13,0)
+	write !!,"Enter metrics item number (blank to terminate, ? for list)",!
+metricinput
+ 	i $data(%input($increment(%input))) s metric=%input(%input)
+ 	e  read !,"Metric#: ", metric
+ 	if (metric = "") goto metricdone
+ 	if (metric = "?") goto metriclisting
+	if ((metric<1)!(metric > MAXMETRIC)) w "  -  Invalid metric number." g metricinput ; RFD043 ; RFD044
+ 	s $zt = "metricerror"
+	do $zu(84,13,1,metric-1) ; RFD044
+	s $zt = "runexit"
+ 	goto metricinput
+metricerror
+ 	w !, $ze
+ 	s $ze = ""
+ 	goto metricinput
+metriclisting
+	for metric = 1:1:MAXMETRIC {	; RFD043 ; RFD044+
+		s txt = $text(@("Flist+"_metric))
+		write !, metric, ".) ",  $piece(txt,";",4), ": ", $piece(txt,";",5) ; RFD044-
+	}
+	goto metricinput
+ }
+metricdone
+ ; Get PID(s) to monitor
+ write !!,"Select which PID(s) to monitor"
+ write !, "  1.) Monitor All PIDs"
+ write !, "  2.) Monitor Current Process Only"
+ write !, "  3.) Enter list of PIDs"
+ write !!,"Enter the number of your choice: <1> "
+ i $data(%input($increment(%input))) s in=%input(%input)
+ e  read in
+ s:in="" in=1
+ if ((in < 1) + (in > 3)) goto metricdone
+ if in = 1 s pids=0
+ if in = 2 s pids=1,pid(1)=$j
+ if in = 3 d 
+ . write !!,"Enter PID (blank to terminate)",!
+ . s pids=0,in=1 f  do  q:in="" 
+ . . i $data(%input($increment(%input))) s in=%input(%input)
+ . . e  read !,"PID: ",in
+ . . q:in=""
+ . . if $zu(67,0,in)'=2 w "  unknown PID" q
+ . . s pids=pids+1,pid(pids)=in
+ ; Start up MONITOR
+ if $zu(84,0,1,1,1,1,1)'=1 set status=-3,err="Memory allocation failed" goto runexit
+ s all=1 if pids>0 s all=2 ; Enable all PIDs or selected PIDs
+ if $zu(84,1,all)'=all set status=-4,err="Couldn't enable stats collection" goto runexit
+ do $zu(84,15)
+ s $zt="piderr"
+ if pids>0 f i=1:1:pids if $zu(84,6,pid(i))  ; Enable individual PIDs
+ set $zt="runexit"
+ set ^SYS("MONITOR","START")=$h
+ kill ^SYS("MONITOR","PAUSE"),^SYS("MONITOR","PAUSE-TIME")
+runexit if $ze]"" set status=0,err="Error trap - "_$ze
+ L -^SYS("MON-HOLD")
+ if err]"" {
+	set status=status_","_err
+	write !!,"Error = ",status
+	do ret
+	quit status
+ }
+ if status = 1 write !!,"Monitor started."
+ do ret 
+ quit status
+piderr ; Error enabling a PID
+ s $zt="runexit",$ze="" 
+ i $ze["FUNCTION" d
+ . w !!,"Error enabling monitor for PID ",pid(i),", not all PIDs enabled"
+ g runexit
+ ;
+ ; Stop MONITOR
+ ;
+Stop() ; Stop Monitor run
+ set $ZE="",$ZT="funcerr",status=1
+ L +^SYS("MON-HOLD"):3
+ else  set status="-1,Somebody else is using Monitor." goto funcex
+ if $zu(84,8)=0 set status="-2,Monitor is not running." goto funcex
+ set zu84=$zu(84,1,0) ; disable stats...
+ set zu84=$zu(84,0,0) ; end collection
+ kill ^SYS("MONITOR","START")
+ kill ^SYS("MONITOR","PAUSE"),^SYS("MONITOR","PAUSE-TIME")
+ L -^SYS("MON-HOLD")
+ quit status
+ ;
+ ; Stop MONITOR
+ ;
+Pause() ;
+ set $ZE="",$ZT="funcerr",status=1
+ L +^SYS("MON-HOLD"):3
+ else  set status="-1,Somebody else is using Monitor." goto funcex
+ if $zu(84,8)=0 set status="-2,Monitor is not running." goto funcex
+ if $zu(84,1)=0 set status="-3,Monitor is already paused." goto funcex
+ set zu84=$zu(84,1,0)
+ set ^SYS("MONITOR","PAUSE")=$h
+ L -^SYS("MON-HOLD")
+ quit status
+ ;
+ ; Resume MONITOR
+ ;
+Resume() ;
+ n h1,x
+ set $ZE="",$ZT="funcerr",status=1
+ L +^SYS("MON-HOLD"):3
+ else  set status="-1,Somebody else is using Monitor." goto funcex
+ if $zu(84,8)=0 set status="-2,Monitor is not running." goto funcex
+ if $zu(84,1)=1 set status="-3,Monitor is already running." goto funcex
+ set zu84=$zu(84,1,1),h1=$h
+ ; Account for paused time
+ if $d(^SYS("MONITOR","PAUSE")) d
+ . set x=$$Time(^SYS("MONITOR","PAUSE"),h1)
+ . set ^SYS("MONITOR","PAUSE-TIME")=x+$g(^SYS("MONITOR","PAUSE-TIME"))
+ . kill ^SYS("MONITOR","PAUSE")
+ L -^SYS("MON-HOLD")
+ quit status
+ ;
+ ; Clear Counters
+ ;
+Clear() ;
+ set $ZE="",$ZT="funcerr",status=1
+ L +^SYS("MON-HOLD"):3
+ else  set status="-1,Somebody else is using Monitor." goto funcex
+ if $zu(84,8)=0 set status="-2,Monitor is not running." goto funcex
+ set zu84=$zu(84,2)
+ set ^SYS("MONITOR","START")=$h ; reset start time
+ set ^SYS("MONITOR","PAUSE-TIME")=0
+ kill ^SYS("MONITOR","PAUSE"),^SYS("MONITOR","PAUSE-TIME")
+ L -^SYS("MON-HOLD")
+ quit status
+ ;
+ ;
+funcerr set status="0, Unexpected Monitor error, "_$ze
+funcex L -^SYS("MON-HOLD")
+ quit status
+ ;
+ ;
+Time(start,end) ; Return difference between start $H and end $H in seconds
+ quit ((end-start)*86400)+($p(end,",",2)-$p(start,",",2))
+ ;
+Flist ;; List of columns available for "Custom" report ; RFD044 - adjust list counts
+ ;;1;GloRef;global refs
+ ;;2;GloSet;global sets 
+ ;;3;GloKill;global kills 
+ ;;4;DirBlkRd;directory block reads
+ ;;5;UpntBlkRd;upper pointer block reads 
+ ;;6;BpntBlkRd;bottom pointer block reads 
+ ;;7;DataBlkRd;data block reads 
+ ;;8;RouBlkRd;routine block reads 
+ ;;9;MapBlkRd;map block reads 
+ ;;10;OthBlkRd;other block reads 
+ ;;11;DirBlkWt;directory block writes
+ ;;12;UpntBlkWt;upper pointer block writes 
+ ;;13;BpntBlkWt;bottom pointer block write 
+ ;;14;DataBlkWt;data block writes 
+ ;;15;RouBlkWt;routine block writes 
+ ;;16;MapBlkWt;map block writes 
+ ;;17;OthBlkWt;other block writes 
+ ;;18;DirBlkBuf;directory block requests satisfied from a global 
+ ;;19;UpntBlkBuf;upper pointer block requests satisfied from a global buffer 
+ ;;20;BpntBlkBuf;bottom pointer block requests satisfied from a global buffer 
+ ;;21;DataBlkBuf;data block requests satisfied from a global buffer 
+ ;;22;RouBlkBuf;routine block requests satisfied from a global buffer 
+ ;;23;MapBlkBuf;map block requests satisfied from a global buffer 
+ ;;24;OthBlkBuf;other block requests satisfied from a global buffer 
+ ;;25;JrnEntry;journal entries 
+ ;;26;BlkAlloc;blocks allocated 
+ ;;27;NetGloRef;network global refs 
+ ;;28;NetGloSet;network set s 
+ ;;29;NetGloKill;network kills 
+ ;;30;NetReqSent;network requests sent 
+ ;;31;NCacheHit;network cache hits 
+ ;;32;NCacheMiss;network cache misses 
+ ;;33;NetLock;network locks
+ ;;34;RtnLine;M commands 
+ ;;35;RtnLoad;routine loads 
+ ;;36;RtnFetch;routine fetches 
+ ;;37;LockCom;lock commands 
+ ;;38;LockSucc;successful lock commands 
+ ;;39;LockFail;failed lock commands 
+ ;;40;TermRead;terminal reads 
+ ;;41;TermWrite;terminal writes 
+ ;;42;TermChRd;terminal read chars 
+ ;;43;TermChWrt;terminal write chars 
+ ;;44;SeqRead;sequential reads 
+ ;;45;SeqWrt;sequential writes 
+ ;;46;IJCMsgRd;local IJC messages read 
+ ;;47;IJCMsgWt;local IJC messages written 
+ ;;48;IJCNetMsg;network IJC messages written 
+ ;;49;Retransmit;network retransmits
+ ;;50;BuffSent;network buffers sent
+ ;;51;Time;elapsed time on wall clock
+ ;;52;TotalTime;total time used (including sub-routines); RFD044
+ ;

@@ -1,0 +1,125 @@
+Class HS.FHIR.DTL.ToSDA.DiagnosticRadOrder Extends Ens.DataTransformDTL [ DependsOn = (HS.FHIR.vDSTU2.Model.Resource.DiagnosticOrder, HS.SDA3.RadOrder) ]
+{
+
+Parameter IGNOREMISSINGSOURCE = 1;
+
+Parameter REPORTERRORS = 1;
+
+Parameter TREATEMPTYREPEATINGFIELDASNULL = 0;
+
+XData DTL [ XMLNamespace = "http://www.intersystems.com/dtl" ]
+{
+<transform sourceClass='HS.FHIR.vDSTU2.Model.Resource.DiagnosticOrder' targetClass='HS.SDA3.RadOrder' create='new' language='objectscript' >
+
+<foreach property='source.identifier()' key='k1' >
+<if condition='source.identifier.(k1).type.text.value &apos;=""' >
+<true>
+<if condition='(target.PlacerId = "")&amp;&amp;(source.identifier.(k1).type.text.value = "PlacerId")||((source.identifier.(k1).type.coding.Count()&gt;0)&amp;&amp;(source.identifier.(k1).type.coding.GetAt(1).code.value="PLAC"))' >
+<true>
+<assign value='source.identifier.(k1).value.value' property='target.PlacerId' action='set' />
+<code>
+<![CDATA[ set identsUsed(k1) = ""]]></code></true>
+<false>
+<if condition='(target.FillerId = "")&amp;&amp;(source.identifier.(k1).type.text.value = "FillerId")||((source.identifier.(k1).type.coding.Count()&gt;0)&amp;&amp;(source.identifier.(k1).type.coding.GetAt(1).code.value="PLAC")) ' >
+<true>
+<assign value='source.identifier.(k1).value.value' property='target.FillerId' action='set' />
+<code>
+<![CDATA[ set identsUsed(k1) = ""]]></code></true>
+<false>
+<if condition='(target.ExternalId = "")&amp;&amp;(source.identifier.(k1).type.text.value = "ExternalId") ' >
+<true>
+<assign value='source.identifier.(k1).value.value' property='target.ExternalId' action='set' />
+<code>
+<![CDATA[ set identsUsed(k1) = ""]]></code></true>
+</if>
+</false>
+</if>
+</false>
+</if>
+</true>
+</if>
+</foreach>
+<foreach property='source.identifier()' key='k5' >
+<if condition='$Data(identsUsed(k5)) = 0' >
+<true>
+<if condition='target.PlacerId = ""' >
+<true>
+<assign value='source.identifier.(k5).value.value' property='target.PlacerId' action='set' />
+</true>
+<false>
+<if condition='target.FillerId = "" ' >
+<true>
+<assign value='source.identifier.(k5).value.value' property='target.FillerId' action='set' />
+</true>
+<false>
+<if condition='target.ExternalId = "" ' >
+<true>
+<assign value='source.identifier.(k5).value.value' property='target.ExternalId' action='set' />
+</true>
+</if>
+</false>
+</if>
+</false>
+</if>
+</true>
+</if>
+</foreach>
+
+<if condition='..StartsWith(source.orderer.reference.value,"#")' >
+<true>
+<foreach property='source.contained()' key='k2' >
+<if condition='("#"_source.contained.(k2).Practitioner.id.value = source.orderer.reference.value)' >
+<true>
+<subtransform class='HS.FHIR.DTL.ToSDA.SubTransform.Practitioner' targetObj='target.OrderedBy' sourceObj='source.contained.(k2).Practitioner' />
+</true>
+</if>
+</foreach>
+</true>
+</if>
+<if condition='..Piece(source.encounter.reference.value,"Encounter/",2) &apos;= ""' >
+<true>
+<assign value='$G(aux("EncounterNumbers",..Piece(source.encounter.reference.value,"Encounter/",2)))' property='target.EncounterNumber' action='set' />
+</true>
+</if>
+<if condition='source.reason.Count() &gt; 0' >
+<true>
+<assign value='source.reason.(1).text.value' property='target.ReasonForStudy.OriginalText' action='set' />
+<if condition='source.reason.(1).coding.Count() &gt; 0' >
+<true>
+<assign value='source.reason.(1).coding.(1).code.value' property='target.ReasonForStudy.Code' action='set' />
+<assign value='source.reason.(1).coding.(1).display.value' property='target.ReasonForStudy.Description' action='set' />
+<assign value='source.reason.(1).coding.(1).version.value' property='target.ReasonForStudy.CodeSystemVersionId' action='set' />
+<assign value='##class(HS.FHIR.DTL.Utils).GetCodeForURI(source.reason.(1).coding.(1).system.value)' property='target.ReasonForStudy.SDACodingStandard' action='set' />
+</true>
+</if>
+</true>
+</if>
+<assign value='##class(HS.FHIR.DTL.Utils).LookupFHIR("ToSDADiagnosticOrderStatus",source.status.value)' property='target.Status' action='set' />
+<assign value='source.priority.value' property='target.Priority.Description' action='set' />
+<assign value='source.priority.value' property='target.Priority.Code' action='set' />
+<if condition='source.note.Count() &gt; 0' >
+<true>
+<assign value='source.note.(1).text.value' property='target.Comments' action='set' />
+</true>
+</if>
+<code>
+<![CDATA[ set iSpecimen = 1]]></code>
+<foreach property='source.specimen()' key='k3' >
+<if condition='..StartsWith(source.specimen.(k3).reference.value,"#")' >
+<true>
+<foreach property='source.contained()' key='k4' >
+<if condition='("#"_source.contained.(k4).Specimen.id.value=source.specimen.(k3).reference.value)' >
+<true>
+<subtransform class='HS.FHIR.DTL.ToSDA.SubTransform.Specimen' targetObj='target.Specimens.(iSpecimen)' sourceObj='source.contained.(k4).Specimen' />
+<code>
+<![CDATA[ set iSpecimen= iSpecimen+1]]></code>
+</true>
+</if>
+</foreach>
+</true>
+</if>
+</foreach>
+</transform>
+}
+
+}

@@ -1,0 +1,346 @@
+ROUTINE EnsUtil
+#include %occInclude
+	; Copyright (c) 2020 by InterSystems Corporation.
+	; Cambridge, Massachusetts, U.S.A.  All rights reserved.
+	; Confidential property of InterSystems Corporation.
+#include EnsUtil
+ 
+ ; IRIS Utility routines
+ 
+HorologCmp(h2,h1) public { ; compare horolog values, return 0 if =, >0 if h2 later, <0 if h1 later
+	s dd = +h2 - +h1
+	Quit:0'=dd dd
+	s td = +$p(h2,",",2)- + $p(h1,",",2)
+	Quit td
+}
+ 
+HorologDiff(later,earlier) public { ; compute the number of seconds difference between two $Horolog/$ZTimestamp-format times; if 'later' is earlier than 'earlier' then the result is a negative number.
+	Quit ($p(later,",")-$p(earlier,","))*(24*3600)+$p(later,",",2) - $p(earlier,",",2)
+}
+ 
+HorologAddSecs(time,secs) public { ; add a given number of seconds to a $Horolog/$ZTimestamp-format time value; subtraction may be done by passing in a negative number of seconds.
+	s newsecs=+$p(time,",",2)+secs
+	s newdays=newsecs\(24*3600), modsecs=newsecs#(24*3600)
+	Quit $p(time,",")+newdays-(newsecs<0&modsecs)_","_modsecs
+}
+
+ ; diff 2 files, return 0 if same, 3 if neither exists, 1 if only first exists, 2 if only second exists
+ ; If pIgnoreWhitespace is nonzero, ignore blank lines and leading and trailing whitespace on each line.
+FileDiff(pFilename1,pFilename2,pIgnoreWhitespace,pInfo) public {
+	Set tFile1Exists=##Class(%File).Exists(pFilename1)
+	Set tFile2Exists=##Class(%File).Exists(pFilename2)
+	if 'tFile1Exists {
+		if 'tFile2Exists {
+			set pInfo($I(pInfo)) = "Neither '"_pFilename1_"' nor' "_pFilename2_"' Exists"
+			Quit 3
+		} else {
+			set pInfo($I(pInfo)) = "File '"_pFilename1_"' does not exist"
+			Quit 2
+		}
+	} else {
+		if 'tFile2Exists {
+			set pInfo($I(pInfo)) = "File '"_pFilename2_"' does not exist"
+			Quit 1
+		}
+	}
+	If 'pIgnoreWhitespace {
+		Set tSize1=##class(%File).GetFileSize(pFilename1)
+		Set tSize2=##class(%File).GetFileSize(pFilename2)
+		If tSize1'=tSize2 Set pInfo($I(pInfo)) = "File '"_pFilename1_"' size ("_tSize1_") is different from file '"_pFilename2_"' size ("_tSize2_")"
+	}
+	Set pInfo0=$Get(pInfo)
+	Set tFile1=##Class(%FileCharacterStream).%New()
+	Set tFile1.TranslateTable = "UTF8"
+	Set tFile1.Filename = pFilename1
+	Set iLine1 = 0
+ 
+	Set tFile2=##Class(%FileCharacterStream).%New()
+	Set tFile2.TranslateTable = "UTF8"
+	Set tFile2.Filename = pFilename2
+	Set iLine2 = 0
+ 
+	if 'tFile1.AtEnd {
+		Set tLine1 = tFile1.ReadLine() Set:pIgnoreWhitespace tLine1 = $ZStrip(tLine1,"<>W")
+		Set iLine1=iLine1+1 
+	} else { Set tLine1 = "" }
+	if 'tFile1.AtEnd {
+		Set tLine2 = tFile2.ReadLine() Set:pIgnoreWhitespace tLine2 = $ZStrip(tLine2,"<>W")
+		Set iLine2=iLine2+1 
+	} else { Set tLine2 = "" }
+ 
+	while 1 {
+		if pIgnoreWhitespace && (""=tLine1) && 'tFile1.AtEnd { Set tLine1 = tFile1.ReadLine(), tLine1 = $ZStrip(tLine1,"<>W"), iLine1=iLine1+1 continue }
+		if pIgnoreWhitespace && (""=tLine2) && 'tFile2.AtEnd { Set tLine2 = tFile2.ReadLine(), tLine2 = $ZStrip(tLine2,"<>W"), iLine2=iLine2+1 continue }
+		if tLine1 '= tLine2 {
+			Set pInfo($I(pInfo)) = "Difference between files at line "_iLine1_" in '"_pFilename1_"' and line "_iLine2_" in '"_pFilename2_"' ("""_tLine1_""" / """_tLine2_""")"
+			Quit
+		}
+		Quit:tFile1.AtEnd&&tFile2.AtEnd
+ 
+		if 'pIgnoreWhitespace {
+			if tFile1.AtEnd {
+				Set pInfo($I(pInfo)) = "File '"_pFilename1_"' ended at line "_iLine1_" before file '"_pFilename2_"'"
+				Quit
+			}
+			if tFile2.AtEnd {
+				Set pInfo($I(pInfo)) = "File '"_pFilename2_"' ended at line "_iLine2_" before file '"_pFilename1_"'"
+				Quit
+			}
+		}
+		if 'tFile1.AtEnd {
+			Set tLine1 = tFile1.ReadLine() Set:pIgnoreWhitespace tLine1 = $ZStrip(tLine1,"<>W")
+			Set iLine1=iLine1+1 
+		} else { Set tLine1 = "" }
+		if 'tFile2.AtEnd {
+			Set tLine2 = tFile2.ReadLine() Set:pIgnoreWhitespace tLine2 = $ZStrip(tLine2,"<>W")
+			Set iLine2=iLine2+1 
+		} else { Set tLine2 = "" }
+	}
+ 
+	Quit:pInfo0=$Get(pInfo) 0
+ 
+	Set tFile1Date = ##Class(%File).GetFileDateModified(pFilename1)
+	Set tFile2Date = ##Class(%File).GetFileDateModified(pFilename2)
+	Set tDiff=$Select($$HorologCmp(tFile1Date,tFile2Date)>0:1,1:2)
+	Set pInfo($I(pInfo)) = "File '"_$S(tDiff=1:pFilename1,1:pFilename2)_"' has a later timestamp ("_$ZDT($S(tDiff=1:tFile1Date,1:tFile2Date),3)_") than file '"_$S(tDiff=1:pFilename2,1:pFilename1)_"' ("_$ZDT($S(tDiff=1:tFile2Date,1:tFile1Date),3)_")"
+	Quit tDiff
+}
+ 
+replace(pData, args...) public {
+	For i=1:2:args { Continue:""=args(i)
+		Set f=0 For { Set f=$F(pData,args(i),f)  Quit:f=0
+			Set subst(f-$L(args(i)))=$LB(f-1,$G(args(i+1)))
+		}
+	}
+	Set beg="" For { Set beg=$O(subst(beg),-1,repl)  Quit:beg=""
+		Set $E(pData,beg,$LI(repl,1))=$LI(repl,2)
+	}
+	Quit pData
+}
+ 
+replaceArray(pData, pairs) public {
+	Set sub="" For { Set sub=$O(pairs(sub),1,rep)  Quit:sub=""
+		Set f=0 For { Set f=$F(pData,sub,f)  Quit:f=0
+			Set subst(f-$L(sub))=$LB(f-1,rep)
+		}
+	}
+	Set beg="" For { Set beg=$O(subst(beg),-1,repl)  Quit:beg=""
+		Set $E(pData,beg,$LI(repl,1))=$LI(repl,2)
+	}
+	Quit pData
+}
+
+#; This method replaces the strings contained in array 'pairs'.
+#; It replaces from left to right and does not repeat and recurse.
+#; This means that once a substring is replaced the replacement result will not be replaced again.
+#; The algorithm also requires that the replacement sources all start and end with the same escape character.
+#; 'maxsub' is an optional argument which if provided gives a length >= the length of the longest replacement target.
+#; 'lastpos' is an output argument returning the position in pData of the last replacement performed.
+replaceArrayLeftToRight(pData, pairs, maxsub, lastpos) public {
+	#; First scan pairs for validity and size
+	set lastpos=0, sub=$O(pairs("")), escape=$S(""=sub:"", 1:$E(sub)), maxsub=$G(maxsub,0)
+	if 'maxsub {
+		while ""'=sub {
+			set:$L(sub)>maxsub maxsub=$L(sub)
+			set sub=$O(pairs(sub))
+		} quit:'maxsub pData ; error
+	}
+	#; Next scan data for pairs to replace
+	set f=1 for {
+		set f=$f(pData,escape,f) quit:f=0
+		set g=$f(pData,escape,f) quit:g=0
+		set sub=$e(pData,f-1,g-1)
+		set:$L(sub)<=maxsub&&$d(pairs(sub)) $e(pData,f-1,g-1)=pairs(sub),f=g-$L(sub)+$L(pairs(sub)), lastpos=f
+	}
+	quit pData
+}
+
+compareArrays(A1,A2) public { ; Compare arrays and return empty string if the same, otherwise the first non-matching path
+	Set A1L=$L($P(A1,")")), A2L=$L($P(A2,")")), Same=1
+	Set A10=$E(A1,1,A1L), A20=$E(A2,1,A2L), Done1=0 
+	Do {
+		Set D1=$D(@A1,a1), D2=$D(@A2,a2)
+		Set Same=(D1=D2)&&('(D1#2)||(a1=a2))  Quit:'Same
+		Set A1=$Q(@A1), A2=$Query(@A2)
+		Set Done1=($E(A1,1,A1L)'=A10), Done2=($E(A2,1,A2L)'=A20)
+		Set Same='(Done1+Done2#2)||($E(A1,A1L+2,*)=$E(A2,A2L+2,*))  Quit:'Same
+	} While 'Done1
+	Quit:Same ""
+	Quit:""'=A1&&'Done1 A1
+	Quit:""'=A2 A2
+	Quit A10
+}
+ 
+getAllErrorTexts(sc,sep,language) public {
+	q:sc=$$$OK $$GetOneStatusText^%apiOBJ($$$ERROR("<%ObjectErrors>OK"),1,.language)
+	s t=$$$qualifierParse("Compiler","/display=noerror",.qstruct)
+	s sc=$$DecomposeStatus^%occSystem(sc,.errorlist,.qstruct,.language)
+	s ds=$g(errorlist(1))
+	q:""=ds||$$$ISERR(sc) ""
+	for i=2:1:errorlist { s ds=ds_$g(sep,$C(13,10,43,13,10))_$g(errorlist(i)) }
+	q ds
+}
+ 
+ExportPackages(pFilename,pPackages="",pExtras="",pExcludes="*.prj",pProjectIn="") public {
+	Set pFilename=$TR(pFilename,"/","\")
+	Set tProjName=$P($P(pFilename,"\",$L(pFilename,"\")),".",1)
+ 
+	; Add all the items from the named input Project (if any)
+	If ""'=pProjectIn Set tSC=$$Import^%occSAX(pProjectIn,,.tFullList,1)  If $$$ISERR(tSC) Do $system.Status.DisplayError(tSC) Quit
+ 
+	; Add all the classes from each Package named in the input Packages list
+	For i=1:1:$L(pPackages,",") { Set tPkg=$ZStrip($P(pPackages,",",i),"<>W") Continue:""=tPkg	
+		w !,"adding package "_tPkg
+		Do $system.OBJ.GetPackageList(.tList,tPkg,"ars")
+		Set class="" For { Set class=$O(tList(class)) Quit:class=""
+			Set tFullList(class_".cls")=""
+		}
+	}
+	w !
+	; Add all the items named in the input Extras list
+	For i=1:1:$L(pExtras,",") { Set tExtra=$ZStrip($P(pExtras,",",i),"<>W")  Continue:""=tExtra
+		w !,"adding "_tExtra
+		Set tFullList(tExtra)=""
+	}
+	w !
+	; Exclude all items named in the input Excludes list, honoring wildcards and case-insensitive
+	For i=1:1:$L(pExcludes,",") { Set tExc=$ZStrip($P(pExcludes,",",i),"<>W")  Continue:""=tExc
+		Set tExc=$ZCVT(tExc,"U")
+		Set tItem="" For { Set tItem=$O(tFullList(tItem)) Quit:tItem=""
+			If $$StarMatch($ZCVT(tItem,"U"),tExc) {
+				w !,"excluding "_tItem
+				Kill tFullList(tItem)
+			}
+		}
+ 	}
+	w !,"Deleting "_tProjName_".prj"
+	Set tSC=##class(%Studio.Project).%DeleteId(tProjName) Do:$$$ISERR(tSC) $system.Status.DisplayError(tSC)
+ 
+	w !,"Building "_tProjName_".prj"
+	Set tProject=##class(%Studio.Project).%New()  Quit:'$IsObject(tProject)
+	Set tProject.Name=tProjName
+	Set tProject.Description="Export of "_pPackages
+ 
+	w !,"Adding items to "_tProjName_".prj"
+	Set item="" For { Set item=$O(tFullList(item)) Quit:item=""
+		//w !,"   adding "_item
+		Do tProject.AddItem(item,$ZCVT($P(item,".",$L(item,".")),"U"))
+	}
+	w !,"Saving "_tProjName_".prj"
+	Set tSC=tProject.%Save() Do:$$$ISERR(tSC) $system.Status.DisplayError(tSC)
+	Set tFullList(tProject.Name_".prj")=""
+	w !
+	Set tSC=$system.OBJ.Export(.tFullList,pFilename) Do:$$$ISERR(tSC) $system.Status.DisplayError(tSC)
+	Write !,"Exported to "_pFilename,!
+	Quit
+}
+ 
+StarMatch(value = "", pattern = "")
+{
+	Set patlen=$L(pattern),cospat="",(quotc,inquot)=0  For i=1:1:patlen { Set c=$E(pattern,i)
+		Set:'quotc c=$Case(c,"*":".E","?":"1E",:c)
+		If 1=$L(c) {
+			Set:'inquot c="1"""_c, inquot=1
+		} Else {
+			Set:inquot c=""""_c, inquot=0 ; close quote
+		}
+		Set cospat=cospat_c, quotc=0
+	}
+	Set:inquot cospat=cospat_"""" ; close quote
+	Quit value?@cospat
+}
+ 
+ 	// HCR069 - Date time input facilitator function to be used in search forms.
+	// Input 'DateTime' can be in format [YYYY-]M[M]-D[D] H[H]:MM[:SS] and may have
+	// only the date portion or only the time portion.
+	// Output is formatted as a TimeStamp value without fractional digits.
+	// Function returns a boolean indicating if the input value is invalid.
+	// If only date is provided, the time portion is assumed to be 00:00:00, or 23:59:59 if IsEnd is true.
+	// If only time is provided, the date portion is assumed to be the current date.
+	// For the date, if the year is not provided, it is assumed to be within the last 365/6 days.
+	// For the time, if the seconds are not provided, they are assumed to be 00, or 59 if IsEnd is true.
+	// Month, day and hour can be 1 digit or 2 digits long and will be padded if needed.
+	// Time can be expressed in 24-hour format or AM/PM format.
+FormatDateTime(DateTime, IsEnd = 0, &FormattedTS) public {
+	Set FormattedTS = ""
+	Set err = 0
+	Set dt = $ZStrip($G(DateTime),"=<>W") // cleanup white spaces
+	Set dt = $Tr(dt,"/","-")
+	Set dt = $ZCvt(dt,"U")
+	For u = " AM"," PM" If dt[u Set $E(dt,$F(dt,u)-3) = ""
+	If $Length(dt," ")=2 {
+		// date & time
+		Set d = $P(dt," ",1), err = $$ForDate(.d)
+		If 'err {
+			Set t = $P(dt," ",2), err = $$ForTime(.t,IsEnd)
+			Set:'err FormattedTS = d_" "_t
+		}
+	}
+	ElseIf $L(dt," ")=1 {
+		// either date or time
+		Set d = dt, err = $$ForDate(.d)
+		If 'err {
+			Set FormattedTS = d_" "_$S(IsEnd:"23:59:59",1:"00:00:00")
+		}
+		Else {
+			Set t = dt, err = $$ForTime(.t,IsEnd)
+			Set:'err FormattedTS = $ZDate($H,3)_" "_t
+		}
+	}
+	Else {
+		Set err = 1
+	}
+	Quit err
+}
+ 
+ForDate(&d) public {
+	If d'?0.1(4n1"-")1.2n1"-"1.2n Quit 1
+	If $L(d,"-")=2 {
+		Set yr = +$ZDate(+$H,3)
+		Set:yr*100+$P(d,"-",1)*100+$P(d,"-",2)>$ZDate(+$H,8) yr = yr-1
+		Set d = yr_"-"_d
+	}
+	Set dh = $ZDateH(d,3,,,,,,,-1)
+	Set:dh'=-1 d = $ZDate(dh,3)
+	Quit dh=-1
+}
+ 
+ForTime(&t,f) public {
+	If (t'?1.2n1":"2n1":"2n.2a) && (t'?1.2n1":"2n.2a) Quit 1
+	If (t["PM") || (t["AM"), ($P(t,":",1)>12) || ('$P(t,":",1)) Quit 1
+	If t["AM" Set t = $P(t,"AM",1) Set:$P(t,":",1)="12" $P(t,":",1)="00"
+	If t["PM" Set t = $P(t,"PM",1) Set:$P(t,":",1)'="12" $P(t,":",1) = $P(t,":",1)+12
+	Set:$P(t,":",3)="" $P(t,":",3) = $S(f:"59",1:"00")
+	Set th = $ZTimeH(t,1,-1)
+	Set:th'=-1 t = $ZTime(th,1)
+	Quit th=-1
+}
+ToggleUseNullDevice(UseNullDevice, &OtherDevice) Public {
+	/*
+		This method allows toggling current device with null device
+
+		If UseNullDevice is 1 and current device is not the null device
+		then the current device is returned in OtherDevice
+		and the current device is set to the null device.
+		If fails to set to the null device then an error will be thrown.
+
+		If UseNullDevice is 0 then the current device will be switched to
+		the device given by parameter OtherDevice if it is specified.
+		If OtherDevice is not specified then it will try to switch to the principal
+		device.
+	*/
+	If UseNullDevice {
+		#dim tNullDevice = $SYSTEM.Device.GetNullDevice()
+		If (tNullDevice'="")&&(tNullDevice'=$IO) { 
+			Open tNullDevice:1
+			Set OtherDevice = $IO
+			Use tNullDevice 
+		}
+	} Else {
+		If $Get(OtherDevice) {
+			If OtherDevice '= $IO Use OtherDevice
+		} Else {
+			Use $Principal
+		}
+	}
+}
